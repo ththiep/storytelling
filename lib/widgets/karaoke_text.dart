@@ -21,10 +21,10 @@ class KaraokeText extends StatelessWidget {
     final base =
         style ??
         Theme.of(context).textTheme.headlineSmall?.copyWith(
-              height: 1.55,
-              fontWeight: FontWeight.w500,
-              color: const Color(0xFF2B2118),
-            );
+          height: 1.55,
+          fontWeight: FontWeight.w500,
+          color: const Color(0xFF2B2118),
+        );
     final active =
         activeStyle ??
         base?.copyWith(
@@ -32,11 +32,7 @@ class KaraokeText extends StatelessWidget {
           fontWeight: FontWeight.w800,
           backgroundColor: const Color(0xFFFFE0B8),
         );
-    final dim =
-        dimStyle ??
-        base?.copyWith(
-          color: const Color(0xFF8A7A6B),
-        );
+    final dim = dimStyle ?? base?.copyWith(color: const Color(0xFF8A7A6B));
 
     final spans = <InlineSpan>[];
     var wordIndex = -1;
@@ -57,8 +53,8 @@ class KaraokeText extends StatelessWidget {
           style: isActive
               ? active
               : isPast
-                  ? base
-                  : dim,
+              ? base
+              : dim,
         ),
       );
     }

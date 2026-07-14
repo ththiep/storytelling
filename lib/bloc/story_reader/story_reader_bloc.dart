@@ -81,7 +81,11 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
     if (current is! StoryReaderReady) return;
     if (current.isPaused) {
       emit(current.copyWith(status: ReaderStatus.speaking));
-      await _audio.resume();
+      try {
+        await _audio.resume();
+      } catch (error) {
+        emit(StoryReaderFailure(error.toString()));
+      }
       return;
     }
     await _startPlayback(emit, current);
@@ -198,14 +202,18 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
     Emitter<StoryReaderState> emit,
     StoryReaderReady current,
   ) async {
-    emit(
-      current.copyWith(
-        status: ReaderStatus.speaking,
-        pageIndex: 0,
-        activeWordIndex: -1,
-      ),
-    );
-    await _audio.play(current.playback);
+    try {
+      emit(
+        current.copyWith(
+          status: ReaderStatus.speaking,
+          pageIndex: 0,
+          activeWordIndex: -1,
+        ),
+      );
+      await _audio.play(current.playback);
+    } catch (error) {
+      emit(StoryReaderFailure(error.toString()));
+    }
   }
 
   @override
