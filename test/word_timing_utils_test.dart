@@ -17,7 +17,9 @@ void main() {
             fullText: 'Too Big!',
             words: [
               StoryWord(word: 'Too', startTimeMs: 500, endTimeMs: 1000),
-              StoryWord(word: 'Big!', startTimeMs: 1100, endTimeMs: 1900),
+              StoryWord(word: 'Big!', startTimeMs: 1300, endTimeMs: 1900),
+              StoryWord(word: 'She', startTimeMs: 2000, endTimeMs: 2020),
+              StoryWord(word: 'stretches', startTimeMs: 2020, endTimeMs: 2600),
             ],
           ),
         ],
@@ -25,7 +27,7 @@ void main() {
       StoryPage(
         pageNumber: 2,
         imageUrl: 'assets/b.png',
-        startTimeMs: 4001,
+        startTimeMs: 4500,
         endTimeMs: 10000,
         lines: [
           StoryLine(
@@ -42,8 +44,14 @@ void main() {
     ];
 
     expect(pageIndexAt(pages, 1000), 0);
+    expect(pageIndexAt(pages, 4250), 0);
     expect(pageIndexAt(pages, 5000), 1);
-    expect(wordIndexAt(pages[0].allWords, 1200), 1);
+    expect(wordIndexAt(pages[0].allWords, 250), -1);
+    expect(wordIndexAt(pages[0].allWords, 1050), 0);
+    expect(wordIndexAt(pages[0].allWords, 1200), 0);
+    expect(wordIndexAt(pages[0].allWords, 1400), 1);
+    expect(wordIndexAt(pages[0].allWords, 2030), 2);
+    expect(wordIndexAt(pages[0].allWords, 2200), 3);
     expect(wordIndexAt(pages[1].allWords, 5300), 1);
   });
 }

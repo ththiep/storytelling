@@ -152,14 +152,14 @@ class _KaraokeReader extends StatelessWidget {
                       activeStyle: const TextStyle(
                         fontSize: 30,
                         height: 1.42,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w800,
                         color: Color(0xFF8F2D1B),
                         backgroundColor: Color(0xFFFFD86B),
                       ),
                       dimStyle: const TextStyle(
                         fontSize: 30,
                         height: 1.42,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w800,
                         color: Color(0xFF8A6F55),
                       ),
                     ),

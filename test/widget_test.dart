@@ -17,7 +17,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.text('Kể chuyện'), findsOneWidget);
+    expect(find.text('Góc kể chuyện'), findsOneWidget);
     expect(find.text('Too Big! Too Small!'), findsOneWidget);
   });
 }

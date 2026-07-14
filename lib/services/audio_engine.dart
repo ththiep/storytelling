@@ -12,14 +12,15 @@ class AudioEngine {
   final AudioPlayer _player;
   final _controller = StreamController<NarrationEvent>.broadcast();
 
-  StreamSubscription<Duration>? _positionSub;
   StreamSubscription<PlayerState>? _stateSub;
+  Timer? _positionTimer;
   Timer? _completionFallback;
 
   bool _speaking = false;
   int _sessionId = 0;
   int _lastPageIndex = -1;
   int _lastWordIndex = -1;
+  int _lastPositionMs = -1;
   StoryPlayback? _playback;
 
   Stream<NarrationEvent> get events => _controller.stream;
@@ -33,6 +34,7 @@ class AudioEngine {
     _playback = playback;
     _lastPageIndex = -1;
     _lastWordIndex = -1;
+    _lastPositionMs = -1;
     _speaking = true;
 
     _completionFallback?.cancel();
@@ -46,9 +48,9 @@ class AudioEngine {
     }
     if (session != _sessionId) return;
 
-    _positionSub = _player.positionStream.listen((position) {
+    _positionTimer = Timer.periodic(const Duration(milliseconds: 50), (_) {
       if (!_speaking || session != _sessionId) return;
-      _emitProgress(position.inMilliseconds);
+      _emitProgress(_player.position.inMilliseconds);
     });
 
     _stateSub = _player.playerStateStream.listen((state) {
@@ -72,9 +74,21 @@ class AudioEngine {
     await _player.play();
   }
 
-  void _emitProgress(int positionMs) {
+  void _emitProgress(int positionMs, {bool allowBackward = false}) {
     final playback = _playback;
     if (playback == null) return;
+    if (!allowBackward &&
+        _lastPositionMs >= 0 &&
+        positionMs < _lastPositionMs - 250) {
+      // just_audio can briefly report an older playback event after loading or
+      // buffering. Dropping it keeps karaoke from jumping back mid-sentence.
+      // ignore: avoid_print
+      print(
+        '[karaoke] ignored stale positionMs=$positionMs '
+        'lastPositionMs=$_lastPositionMs',
+      );
+      return;
+    }
 
     final pageIndex = pageIndexAt(playback.pages, positionMs);
     final page = playback.pages.isEmpty ? null : playback.pages[pageIndex];
@@ -83,8 +97,19 @@ class AudioEngine {
         : wordIndexAt(page.allWords, positionMs);
 
     if (pageIndex == _lastPageIndex && wordIndex == _lastWordIndex) return;
+    final word =
+        page == null || wordIndex < 0 || wordIndex >= page.allWords.length
+        ? '-'
+        : page.allWords[wordIndex].word;
+    // Keep this log while tuning karaoke sync. It only fires when page/word changes.
+    // ignore: avoid_print
+    print(
+      '[karaoke] positionMs=$positionMs pageIndex=$pageIndex '
+      'wordIndex=$wordIndex word="$word"',
+    );
     _lastPageIndex = pageIndex;
     _lastWordIndex = wordIndex;
+    _lastPositionMs = positionMs;
     _controller.add(
       NarrationTimelineProgress(
         positionMs: positionMs,
@@ -111,7 +136,8 @@ class AudioEngine {
 
     final clampedPosition = positionMs.clamp(0, playback.durationMs);
     await _player.seek(Duration(milliseconds: clampedPosition));
-    _emitProgress(clampedPosition);
+    _lastPositionMs = clampedPosition;
+    _emitProgress(clampedPosition, allowBackward: true);
   }
 
   Future<void> stop() async {
@@ -119,6 +145,7 @@ class AudioEngine {
     _speaking = false;
     _lastPageIndex = -1;
     _lastWordIndex = -1;
+    _lastPositionMs = -1;
     _playback = null;
     _completionFallback?.cancel();
     _completionFallback = null;
@@ -127,9 +154,9 @@ class AudioEngine {
   }
 
   Future<void> _cancelSubscriptions() async {
-    await _positionSub?.cancel();
+    _positionTimer?.cancel();
     await _stateSub?.cancel();
-    _positionSub = null;
+    _positionTimer = null;
     _stateSub = null;
   }
 
