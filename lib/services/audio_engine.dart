@@ -78,8 +78,9 @@ class AudioEngine {
 
     final pageIndex = pageIndexAt(playback.pages, positionMs);
     final page = playback.pages.isEmpty ? null : playback.pages[pageIndex];
-    final wordIndex =
-        page == null ? -1 : wordIndexAt(page.allWords, positionMs);
+    final wordIndex = page == null
+        ? -1
+        : wordIndexAt(page.allWords, positionMs);
 
     if (pageIndex == _lastPageIndex && wordIndex == _lastWordIndex) return;
     _lastPageIndex = pageIndex;
@@ -100,7 +101,17 @@ class AudioEngine {
   }
 
   Future<void> resume() async {
+    _speaking = true;
     await _player.play();
+  }
+
+  Future<void> seekTo(int positionMs) async {
+    final playback = _playback;
+    if (playback == null) return;
+
+    final clampedPosition = positionMs.clamp(0, playback.durationMs);
+    await _player.seek(Duration(milliseconds: clampedPosition));
+    _emitProgress(clampedPosition);
   }
 
   Future<void> stop() async {

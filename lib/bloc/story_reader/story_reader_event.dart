@@ -32,6 +32,24 @@ final class StoryReaderClosed extends StoryReaderEvent {
   const StoryReaderClosed();
 }
 
+final class StoryReaderPageChanged extends StoryReaderEvent {
+  const StoryReaderPageChanged(this.pageIndex);
+
+  final int pageIndex;
+
+  @override
+  List<Object?> get props => [pageIndex];
+}
+
+final class StoryReaderAutoTurnPageToggled extends StoryReaderEvent {
+  const StoryReaderAutoTurnPageToggled(this.enabled);
+
+  final bool enabled;
+
+  @override
+  List<Object?> get props => [enabled];
+}
+
 final class StoryReaderTimelineProgressed extends StoryReaderEvent {
   const StoryReaderTimelineProgressed({
     required this.pageIndex,

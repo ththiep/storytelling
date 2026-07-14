@@ -10,16 +10,16 @@ import 'story_reader_event.dart';
 import 'story_reader_state.dart';
 
 class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
-  StoryReaderBloc({
-    required this._repository,
-    required AudioEngine audioEngine,
-  })  : _audio = audioEngine,
-        super(const StoryReaderInitial()) {
+  StoryReaderBloc({required this._repository, required AudioEngine audioEngine})
+    : _audio = audioEngine,
+      super(const StoryReaderInitial()) {
     on<StoryReaderStarted>(_onStarted);
     on<StoryReaderPlayPressed>(_onPlay);
     on<StoryReaderPausePressed>(_onPause);
     on<StoryReaderReplayPressed>(_onReplay);
     on<StoryReaderClosed>(_onClosed);
+    on<StoryReaderPageChanged>(_onPageChanged);
+    on<StoryReaderAutoTurnPageToggled>(_onAutoTurnPageToggled);
     on<StoryReaderTimelineProgressed>(_onTimelineProgressed);
     on<StoryReaderSpeakCompleted>(_onSpeakCompleted);
 
@@ -64,6 +64,7 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
           pageIndex: 0,
           activeWordIndex: -1,
           status: ReaderStatus.idle,
+          autoTurnPage: true,
         ),
       );
       add(const StoryReaderPlayPressed());
@@ -112,6 +113,33 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
     await _audio.stop();
   }
 
+  Future<void> _onPageChanged(
+    StoryReaderPageChanged event,
+    Emitter<StoryReaderState> emit,
+  ) async {
+    final current = state;
+    if (current is! StoryReaderReady) return;
+    if (event.pageIndex < 0 ||
+        event.pageIndex >= current.playback.pages.length) {
+      return;
+    }
+    if (current.pageIndex == event.pageIndex) return;
+
+    emit(current.copyWith(pageIndex: event.pageIndex, activeWordIndex: -1));
+    await _audio.seekTo(current.playback.pages[event.pageIndex].startTimeMs);
+  }
+
+  void _onAutoTurnPageToggled(
+    StoryReaderAutoTurnPageToggled event,
+    Emitter<StoryReaderState> emit,
+  ) {
+    final current = state;
+    if (current is! StoryReaderReady) return;
+    if (current.autoTurnPage == event.enabled) return;
+
+    emit(current.copyWith(autoTurnPage: event.enabled));
+  }
+
   void _onTimelineProgressed(
     StoryReaderTimelineProgressed event,
     Emitter<StoryReaderState> emit,
@@ -119,14 +147,22 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
     final current = state;
     if (current is! StoryReaderReady) return;
     if (!current.isSpeaking) return;
-    if (current.pageIndex == event.pageIndex &&
-        current.activeWordIndex == event.wordIndex) {
+
+    final nextPageIndex = current.autoTurnPage
+        ? event.pageIndex
+        : current.pageIndex;
+    final nextWordIndex = event.pageIndex == nextPageIndex
+        ? event.wordIndex
+        : -1;
+
+    if (current.pageIndex == nextPageIndex &&
+        current.activeWordIndex == nextWordIndex) {
       return;
     }
     emit(
       current.copyWith(
-        pageIndex: event.pageIndex,
-        activeWordIndex: event.wordIndex,
+        pageIndex: nextPageIndex,
+        activeWordIndex: nextWordIndex,
       ),
     );
   }
@@ -139,15 +175,15 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
     if (current is! StoryReaderReady) return;
     if (!current.isSpeaking) return;
 
-    final lastPageIndex =
-        current.playback.pages.isEmpty ? 0 : current.playback.pages.length - 1;
+    final lastPageIndex = current.playback.pages.isEmpty
+        ? 0
+        : current.playback.pages.length - 1;
     final lastPage = current.playback.pages.isEmpty
         ? null
         : current.playback.pages[lastPageIndex];
-    final lastWordIndex =
-        lastPage == null || lastPage.allWords.isEmpty
-            ? -1
-            : lastPage.allWords.length - 1;
+    final lastWordIndex = lastPage == null || lastPage.allWords.isEmpty
+        ? -1
+        : lastPage.allWords.length - 1;
 
     emit(
       current.copyWith(

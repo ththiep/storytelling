@@ -36,6 +36,7 @@ final class StoryReaderReady extends StoryReaderState {
     required this.pageIndex,
     required this.activeWordIndex,
     required this.status,
+    required this.autoTurnPage,
   });
 
   final StoryDetail story;
@@ -43,6 +44,7 @@ final class StoryReaderReady extends StoryReaderState {
   final int pageIndex;
   final int activeWordIndex;
   final ReaderStatus status;
+  final bool autoTurnPage;
 
   StoryPage? get currentPage =>
       playback.pages.isEmpty ? null : playback.pages[pageIndex];
@@ -57,6 +59,7 @@ final class StoryReaderReady extends StoryReaderState {
     int? pageIndex,
     int? activeWordIndex,
     ReaderStatus? status,
+    bool? autoTurnPage,
   }) {
     return StoryReaderReady(
       story: story ?? this.story,
@@ -64,15 +67,17 @@ final class StoryReaderReady extends StoryReaderState {
       pageIndex: pageIndex ?? this.pageIndex,
       activeWordIndex: activeWordIndex ?? this.activeWordIndex,
       status: status ?? this.status,
+      autoTurnPage: autoTurnPage ?? this.autoTurnPage,
     );
   }
 
   @override
   List<Object?> get props => [
-        story.id,
-        playback.audioSource,
-        pageIndex,
-        activeWordIndex,
-        status,
-      ];
+    story.id,
+    playback.audioSource,
+    pageIndex,
+    activeWordIndex,
+    status,
+    autoTurnPage,
+  ];
 }

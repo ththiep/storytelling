@@ -16,8 +16,7 @@ class StoryReaderScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => getIt<StoryReaderBloc>()
-        ..add(StoryReaderStarted(storyId)),
+      create: (_) => getIt<StoryReaderBloc>()..add(StoryReaderStarted(storyId)),
       child: const _StoryReaderView(),
     );
   }
@@ -47,11 +46,7 @@ class _StoryReaderViewState extends State<_StoryReaderView> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFFFF8EE),
-              Color(0xFFF5DFC4),
-              Color(0xFFE9C9A2),
-            ],
+            colors: [Color(0xFFFFF8EE), Color(0xFFF5DFC4), Color(0xFFE9C9A2)],
           ),
         ),
         child: SafeArea(
@@ -78,43 +73,48 @@ class _StoryReaderViewState extends State<_StoryReaderView> {
             builder: (context, state) {
               return switch (state) {
                 StoryReaderInitial() || StoryReaderLoading() => const Center(
-                    child: CircularProgressIndicator(),
-                  ),
+                  child: CircularProgressIndicator(),
+                ),
                 StoryReaderFailure(:final message) => Center(
-                    child: Text('Lỗi: $message'),
-                  ),
+                  child: Text('Lỗi: $message'),
+                ),
                 final StoryReaderReady ready => Column(
-                    children: [
-                      _ReaderHeader(
-                        title: ready.story.title,
-                        subtitle:
-                            'Trang ${ready.pageIndex + 1}/${ready.playback.pages.length} · ${ready.story.author.split('\n').first}',
-                        onClose: () {
-                          context
-                              .read<StoryReaderBloc>()
-                              .add(const StoryReaderClosed());
-                          Navigator.of(context).pop();
+                  children: [
+                    _ReaderHeader(
+                      title: ready.story.title,
+                      subtitle:
+                          'Trang ${ready.pageIndex + 1}/${ready.playback.pages.length} · ${ready.story.author.split('\n').first}',
+                      onClose: () {
+                        context.read<StoryReaderBloc>().add(
+                          const StoryReaderClosed(),
+                        );
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    Expanded(
+                      child: PageView.builder(
+                        controller: _pageController,
+                        itemCount: ready.playback.pages.length,
+                        onPageChanged: (index) {
+                          context.read<StoryReaderBloc>().add(
+                            StoryReaderPageChanged(index),
+                          );
+                        },
+                        itemBuilder: (context, index) {
+                          final page = ready.playback.pages[index];
+                          final isCurrent = index == ready.pageIndex;
+                          return _StoryPageView(
+                            page: page,
+                            activeWordIndex: isCurrent
+                                ? ready.activeWordIndex
+                                : -1,
+                          );
                         },
                       ),
-                      Expanded(
-                        child: PageView.builder(
-                          controller: _pageController,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: ready.playback.pages.length,
-                          itemBuilder: (context, index) {
-                            final page = ready.playback.pages[index];
-                            final isCurrent = index == ready.pageIndex;
-                            return _StoryPageView(
-                              page: page,
-                              activeWordIndex:
-                                  isCurrent ? ready.activeWordIndex : -1,
-                            );
-                          },
-                        ),
-                      ),
-                      _ReaderControls(state: ready),
-                    ],
-                  ),
+                    ),
+                    _ReaderControls(state: ready),
+                  ],
+                ),
               };
             },
           ),
@@ -125,10 +125,7 @@ class _StoryReaderViewState extends State<_StoryReaderView> {
 }
 
 class _StoryPageView extends StatelessWidget {
-  const _StoryPageView({
-    required this.page,
-    required this.activeWordIndex,
-  });
+  const _StoryPageView({required this.page, required this.activeWordIndex});
 
   final StoryPage page;
   final int activeWordIndex;
@@ -284,16 +281,64 @@ class _ReaderControls extends StatelessWidget {
             state.isFinished
                 ? 'Đã đọc xong câu chuyện'
                 : state.isSpeaking
-                    ? 'Đang đọc…'
-                    : state.isPaused
-                        ? 'Đã tạm dừng'
-                        : 'Nhấn phát để nghe',
-            style: const TextStyle(
-              fontSize: 13,
-              color: Color(0xFF7A6856),
-            ),
+                ? 'Đang đọc…'
+                : state.isPaused
+                ? 'Đã tạm dừng'
+                : 'Nhấn phát để nghe',
+            style: const TextStyle(fontSize: 13, color: Color(0xFF7A6856)),
+          ),
+          const SizedBox(height: 10),
+          _AutoTurnPageSwitch(
+            enabled: state.autoTurnPage,
+            onChanged: (enabled) {
+              bloc.add(StoryReaderAutoTurnPageToggled(enabled));
+            },
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _AutoTurnPageSwitch extends StatelessWidget {
+  const _AutoTurnPageSwitch({required this.enabled, required this.onChanged});
+
+  final bool enabled;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white.withValues(alpha: 0.56),
+      borderRadius: BorderRadius.circular(28),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 6, 10, 6),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.auto_stories_rounded,
+              size: 18,
+              color: Color(0xFF7A6856),
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'Auto chuyển trang',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF7A6856),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Switch(
+              value: enabled,
+              onChanged: onChanged,
+              activeThumbColor: const Color(0xFFC45C26),
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -326,8 +371,8 @@ class _PlayButton extends StatelessWidget {
             isFinished
                 ? Icons.replay_rounded
                 : isSpeaking
-                    ? Icons.pause_rounded
-                    : Icons.play_arrow_rounded,
+                ? Icons.pause_rounded
+                : Icons.play_arrow_rounded,
             color: Colors.white,
             size: 36,
           ),
