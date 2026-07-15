@@ -22,6 +22,7 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
     on<StoryReaderAutoTurnPageToggled>(_onAutoTurnPageToggled);
     on<StoryReaderTimelineProgressed>(_onTimelineProgressed);
     on<StoryReaderSpeakCompleted>(_onSpeakCompleted);
+    on<StoryReaderListenAgainPressed>(_onListenAgain);
 
     _audioSub = _audio.events.listen(_onAudioEvent);
   }
@@ -171,31 +172,39 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
     );
   }
 
-  Future<void> _onSpeakCompleted(
+  void _onSpeakCompleted(
     StoryReaderSpeakCompleted event,
     Emitter<StoryReaderState> emit,
-  ) async {
+  ) {
     final current = state;
     if (current is! StoryReaderReady) return;
     if (!current.isSpeaking) return;
 
-    final lastPageIndex = current.playback.pages.isEmpty
-        ? 0
-        : current.playback.pages.length - 1;
-    final lastPage = current.playback.pages.isEmpty
-        ? null
-        : current.playback.pages[lastPageIndex];
-    final lastWordIndex = lastPage == null || lastPage.allWords.isEmpty
-        ? -1
-        : lastPage.allWords.length - 1;
-
     emit(
-      current.copyWith(
-        pageIndex: lastPageIndex,
-        activeWordIndex: lastWordIndex,
-        status: ReaderStatus.finished,
+      StoryReaderCompleted(
+        story: current.story,
+        playback: current.playback,
       ),
     );
+  }
+
+  Future<void> _onListenAgain(
+    StoryReaderListenAgainPressed event,
+    Emitter<StoryReaderState> emit,
+  ) async {
+    final current = state;
+    if (current is! StoryReaderCompleted) return;
+
+    final ready = StoryReaderReady(
+      story: current.story,
+      playback: current.playback,
+      pageIndex: 0,
+      activeWordIndex: -1,
+      status: ReaderStatus.speaking,
+      autoTurnPage: true,
+    );
+    emit(ready);
+    await _startPlayback(emit, ready);
   }
 
   Future<void> _startPlayback(

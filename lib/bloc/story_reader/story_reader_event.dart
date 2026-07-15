@@ -66,3 +66,7 @@ final class StoryReaderTimelineProgressed extends StoryReaderEvent {
 final class StoryReaderSpeakCompleted extends StoryReaderEvent {
   const StoryReaderSpeakCompleted();
 }
+
+final class StoryReaderListenAgainPressed extends StoryReaderEvent {
+  const StoryReaderListenAgainPressed();
+}

@@ -81,3 +81,16 @@ final class StoryReaderReady extends StoryReaderState {
     autoTurnPage,
   ];
 }
+
+final class StoryReaderCompleted extends StoryReaderState {
+  const StoryReaderCompleted({
+    required this.story,
+    required this.playback,
+  });
+
+  final StoryDetail story;
+  final StoryPlayback playback;
+
+  @override
+  List<Object?> get props => [story.id, playback.audioSource];
+}

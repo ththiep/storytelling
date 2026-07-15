@@ -6,6 +6,7 @@ import '../bloc/story_reader/story_reader_event.dart';
 import '../bloc/story_reader/story_reader_state.dart';
 import '../di/injection_container.dart';
 import '../widgets/karaoke_text.dart';
+import 'story_completion_screen.dart';
 
 class StoryReaderScreen extends StatelessWidget {
   const StoryReaderScreen({super.key, required this.storyId});
@@ -79,6 +80,8 @@ class _StoryReaderViewState extends State<_StoryReaderView> {
                     _ReaderControls(state: ready),
                   ],
                 ),
+                final StoryReaderCompleted completed =>
+                  StoryCompletionView(state: completed),
               };
             },
           ),
