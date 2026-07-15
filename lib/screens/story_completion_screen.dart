@@ -4,6 +4,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/story_reader/story_reader_bloc.dart';
 import '../bloc/story_reader/story_reader_event.dart';
 import '../bloc/story_reader/story_reader_state.dart';
+import '../theme/app_assets.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_typography.dart';
+import '../theme/theme_manager.dart';
+import '../widgets/story_back_button.dart';
+import '../widgets/stroke_text.dart';
 import 'story_game_screen.dart';
 
 class StoryCompletionView extends StatelessWidget {
@@ -13,6 +19,7 @@ class StoryCompletionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.storyTheme;
     final bloc = context.read<StoryReaderBloc>();
 
     return Column(
@@ -26,66 +33,74 @@ class StoryCompletionView extends StatelessWidget {
         ),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
-            child: Column(
-              children: [
-                const Spacer(),
-                const Icon(
-                  Icons.celebration_rounded,
-                  size: 72,
-                  color: Color(0xFFC45C26),
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  'Chúc mừng!',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w900,
-                    color: Color(0xFF2B2118),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'Con đã nghe xong câu chuyện\n"${state.story.title}"',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    height: 1.45,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF6E5A48),
-                  ),
-                ),
-                const Spacer(),
-                _CompletionOptionCard(
-                  icon: Icons.replay_rounded,
-                  iconColor: const Color(0xFF8F2D1B),
-                  iconBackground: const Color(0xFFFFD86B),
-                  title: 'Bạn có muốn nghe lại không?',
-                  subtitle: 'Nghe lại từ đầu',
-                  onTap: () {
-                    bloc.add(const StoryReaderListenAgainPressed());
-                  },
-                ),
-                const SizedBox(height: 14),
-                _CompletionOptionCard(
-                  icon: Icons.videogame_asset_rounded,
-                  iconColor: const Color(0xFF1F5C4A),
-                  iconBackground: const Color(0xFFB8E8D8),
-                  title: 'Bạn có muốn chơi game không?',
-                  subtitle: 'Chơi game cùng câu chuyện',
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => StoryGameScreen(
-                          storyId: state.story.id,
-                          storyTitle: state.story.title,
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+            child: DecoratedBox(
+              decoration: theme.kidPanelDecoration(),
+              child: Padding(
+                padding: const EdgeInsets.all(4),
+                child: DecoratedBox(
+                  decoration: theme.kidPanelInnerDecoration(standalone: true),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+                    child: Column(
+                      children: [
+                        const Spacer(),
+                        Image.asset(
+                          AppAssets.congratulation,
+                          width: 120,
+                          height: 120,
                         ),
-                      ),
-                    );
-                  },
+                        const SizedBox(height: 16),
+                        StrokeText(
+                          text: 'Chúc mừng!',
+                          strokeColor: AppColors.strokeTitle,
+                          strokeWidth: 4,
+                          shadowOffset: const Offset(0, 3),
+                          shadowColor: AppColors.strokeTitleShadow,
+                          textStyle: AppTypography.celebrationTitle(
+                            color: AppColors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Con đã nghe xong câu chuyện\n"${state.story.title}"',
+                          textAlign: TextAlign.center,
+                          style: theme.bodyLarge,
+                        ),
+                        const Spacer(),
+                        _CompletionOptionCard(
+                          iconAsset: AppAssets.playButton,
+                          iconColor: theme.readingColor,
+                          iconBackground: theme.readingBackground,
+                          title: 'Bạn có muốn nghe lại không?',
+                          subtitle: 'Nghe lại từ đầu',
+                          onTap: () {
+                            bloc.add(const StoryReaderListenAgainPressed());
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        _CompletionOptionCard(
+                          iconAsset: AppAssets.storyBook,
+                          iconColor: theme.playColor,
+                          iconBackground: theme.playBackground,
+                          title: 'Bạn có muốn chơi game không?',
+                          subtitle: 'Chơi game cùng câu chuyện',
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => StoryGameScreen(
+                                  storyTitle: state.story.title,
+                                  pages: state.story.pages,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 8),
-              ],
+              ),
             ),
           ),
         ),
@@ -102,43 +117,30 @@ class _CompletionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.storyTheme;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 16, 8),
       child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.72),
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.86)),
-        ),
+        decoration: theme.surfaceCardDecoration(),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(4, 6, 14, 6),
           child: Row(
             children: [
-              IconButton.filledTonal(
-                onPressed: onClose,
-                icon: const Icon(Icons.arrow_back_rounded),
-                color: const Color(0xFF3B2A1C),
-                style: IconButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFE3A6),
-                ),
-              ),
+              StoryBackButton(onPressed: onClose),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 19,
-                    fontWeight: FontWeight.w900,
-                    color: Color(0xFF2B2118),
-                  ),
+                  style: theme.sectionTitle,
                 ),
               ),
-              const Icon(
-                Icons.check_circle_rounded,
-                color: Color(0xFF2E8B57),
-                size: 26,
+              Image.asset(
+                AppAssets.completeStory,
+                width: 28,
+                height: 28,
               ),
             ],
           ),
@@ -150,15 +152,17 @@ class _CompletionHeader extends StatelessWidget {
 
 class _CompletionOptionCard extends StatelessWidget {
   const _CompletionOptionCard({
-    required this.icon,
+    this.icon,
+    this.iconAsset,
     required this.iconColor,
     required this.iconBackground,
     required this.title,
     required this.subtitle,
     required this.onTap,
-  });
+  }) : assert(icon != null || iconAsset != null);
 
-  final IconData icon;
+  final IconData? icon;
+  final String? iconAsset;
   final Color iconColor;
   final Color iconBackground;
   final String title;
@@ -167,69 +171,49 @@ class _CompletionOptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.storyTheme;
+
     return Material(
-      color: Colors.white.withValues(alpha: 0.78),
-      borderRadius: BorderRadius.circular(24),
-      elevation: 0,
+      color: AppColors.white,
+      borderRadius: theme.radiusLarge,
       child: InkWell(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: theme.radiusLarge,
         onTap: onTap,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(18, 18, 16, 18),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.92)),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF8A4B20).withValues(alpha: 0.1),
-                blurRadius: 18,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: iconBackground,
-                  borderRadius: BorderRadius.circular(18),
+        child: Ink(
+          decoration: theme.storyCardDecoration(),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 14, 16),
+            child: Row(
+              children: [
+                Container(
+                  width: 54,
+                  height: 54,
+                  decoration: BoxDecoration(
+                    color: iconBackground,
+                    borderRadius: theme.radiusMedium,
+                  ),
+                  child: iconAsset != null
+                      ? Image.asset(iconAsset!, width: 32, height: 32)
+                      : Icon(icon, color: iconColor, size: 28),
                 ),
-                child: Icon(icon, color: iconColor, size: 30),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w900,
-                        color: Color(0xFF2B2118),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF7A6856),
-                      ),
-                    ),
-                  ],
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title, style: theme.modeTitle),
+                      const SizedBox(height: 4),
+                      Text(subtitle, style: theme.bodySmall),
+                    ],
+                  ),
                 ),
-              ),
-              const Icon(
-                Icons.arrow_forward_ios_rounded,
-                size: 18,
-                color: Color(0xFFC45C26),
-              ),
-            ],
+                Image.asset(
+                  AppAssets.rightChevron,
+                  width: 18,
+                  height: 18,
+                ),
+              ],
+            ),
           ),
         ),
       ),

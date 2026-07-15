@@ -5,7 +5,12 @@ import '../bloc/story_reader/story_reader_bloc.dart';
 import '../bloc/story_reader/story_reader_event.dart';
 import '../bloc/story_reader/story_reader_state.dart';
 import '../di/injection_container.dart';
+import '../theme/app_assets.dart';
+import '../theme/app_colors.dart';
+import '../theme/theme_manager.dart';
 import '../widgets/karaoke_text.dart';
+import '../widgets/story_back_button.dart';
+import '../widgets/story_scaffold_background.dart';
 import 'story_completion_screen.dart';
 
 class StoryReaderScreen extends StatelessWidget {
@@ -32,15 +37,10 @@ class _StoryReaderView extends StatefulWidget {
 class _StoryReaderViewState extends State<_StoryReaderView> {
   @override
   Widget build(BuildContext context) {
+    final theme = context.storyTheme;
+
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFFFFF7D8), Color(0xFFFFE4BB), Color(0xFFFFCFA2)],
-          ),
-        ),
+      body: StoryScaffoldBackground(
         child: SafeArea(
           child: BlocBuilder<StoryReaderBloc, StoryReaderState>(
             buildWhen: (previous, current) {
@@ -59,7 +59,10 @@ class _StoryReaderViewState extends State<_StoryReaderView> {
                   child: CircularProgressIndicator(),
                 ),
                 StoryReaderFailure(:final message) => Center(
-                  child: Text('Lỗi: $message'),
+                  child: Text(
+                    'Lỗi: $message',
+                    style: theme.bodyMedium.copyWith(color: theme.error),
+                  ),
                 ),
                 final StoryReaderReady ready => Column(
                   children: [
@@ -108,6 +111,7 @@ class _KaraokeReader extends StatelessWidget {
         if (state is! StoryReaderReady) return const SizedBox.shrink();
         final page = state.currentPage;
         if (page == null) return const SizedBox.shrink();
+        final theme = context.storyTheme;
 
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
@@ -127,18 +131,7 @@ class _KaraokeReader extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(18, 10, 18, 10),
             child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.7),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF8A4B20).withValues(alpha: 0.12),
-                    blurRadius: 22,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
+              decoration: theme.storyCardDecoration(),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(18, 20, 18, 20),
                 child: Center(
@@ -146,25 +139,9 @@ class _KaraokeReader extends StatelessWidget {
                     child: KaraokeText(
                       text: page.displayText,
                       activeWordIndex: state.activeWordIndex,
-                      style: const TextStyle(
-                        fontSize: 30,
-                        height: 1.42,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF3B2A1C),
-                      ),
-                      activeStyle: const TextStyle(
-                        fontSize: 30,
-                        height: 1.42,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF8F2D1B),
-                        backgroundColor: Color(0xFFFFD86B),
-                      ),
-                      dimStyle: const TextStyle(
-                        fontSize: 30,
-                        height: 1.42,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF8A6F55),
-                      ),
+                      style: theme.karaoke,
+                      activeStyle: theme.karaokeActive,
+                      dimStyle: theme.karaokeDim,
                     ),
                   ),
                 ),
@@ -190,26 +167,17 @@ class _ReaderHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.storyTheme;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 8, 16, 8),
       child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.72),
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.86)),
-        ),
+        decoration: theme.surfaceCardDecoration(),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(4, 6, 14, 6),
           child: Row(
             children: [
-              IconButton.filledTonal(
-                onPressed: onClose,
-                icon: const Icon(Icons.arrow_back_rounded),
-                color: const Color(0xFF3B2A1C),
-                style: IconButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFE3A6),
-                ),
-              ),
+              StoryBackButton(onPressed: onClose),
               const SizedBox(width: 4),
               Expanded(
                 child: Column(
@@ -219,30 +187,22 @@ class _ReaderHeader extends StatelessWidget {
                       title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 19,
-                        fontWeight: FontWeight.w900,
-                        color: Color(0xFF2B2118),
-                      ),
+                      style: theme.sectionTitle,
                     ),
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF7A6856),
-                      ),
+                      style: theme.bodySmall,
                     ),
                   ],
                 ),
               ),
-              const Icon(
-                Icons.auto_stories_rounded,
-                color: Color(0xFFC45C26),
-                size: 24,
+              Image.asset(
+                AppAssets.storyBook,
+                width: 28,
+                height: 28,
               ),
             ],
           ),
@@ -259,6 +219,7 @@ class _ReaderControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.storyTheme;
     final bloc = context.read<StoryReaderBloc>();
     final status = state.isFinished
         ? 'Con đã nghe xong rồi!'
@@ -271,18 +232,7 @@ class _ReaderControls extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.72),
-          borderRadius: BorderRadius.circular(26),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF8A4B20).withValues(alpha: 0.12),
-              blurRadius: 18,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
+        decoration: theme.surfaceCardDecoration(),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
           child: Row(
@@ -310,10 +260,8 @@ class _ReaderControls extends StatelessWidget {
                       status,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF3B2A1C),
+                      style: theme.bodyMedium.copyWith(
+                        color: theme.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -342,36 +290,29 @@ class _AutoTurnPageSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: const Color(0xFFFFEBC2),
-      borderRadius: BorderRadius.circular(20),
+    final theme = context.storyTheme;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.yellow100,
+        borderRadius: theme.radiusMedium,
+      ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(10, 4, 8, 4),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.auto_stories_rounded,
               size: 16,
-              color: Color(0xFFC45C26),
+              color: theme.readingColor,
             ),
             const SizedBox(width: 6),
-            const Text(
-              'Tự lật trang',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF6E4B2E),
-              ),
-            ),
+            Text('Tự lật trang', style: theme.caption),
             const SizedBox(width: 6),
             Switch(
               value: enabled,
               onChanged: onChanged,
-              activeThumbColor: const Color(0xFFC45C26),
-              activeTrackColor: const Color(0xFFFFC36B),
-              inactiveThumbColor: const Color(0xFFBFA489),
-              inactiveTrackColor: const Color(0xFFFFF6E6),
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
           ],
@@ -395,25 +336,18 @@ class _PlayButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xFFD94B2B),
-      shape: const CircleBorder(),
-      elevation: 6,
-      shadowColor: const Color(0xFFD94B2B).withValues(alpha: 0.35),
+      color: AppColors.transparent,
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: onPressed,
-        child: SizedBox(
+        child: Image.asset(
+          isFinished
+              ? AppAssets.playButton
+              : isSpeaking
+              ? AppAssets.pauseButton
+              : AppAssets.playButton,
           width: 68,
           height: 68,
-          child: Icon(
-            isFinished
-                ? Icons.replay_rounded
-                : isSpeaking
-                ? Icons.pause_rounded
-                : Icons.play_arrow_rounded,
-            color: Colors.white,
-            size: 38,
-          ),
         ),
       ),
     );

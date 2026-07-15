@@ -5,6 +5,7 @@ import 'bloc/story_list/story_list_bloc.dart';
 import 'bloc/story_list/story_list_event.dart';
 import 'di/injection_container.dart';
 import 'screens/home_screen.dart';
+import 'theme/theme_manager.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,13 +23,7 @@ class StorytellingApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Kể chuyện',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFFC45C26),
-            brightness: Brightness.light,
-          ),
-          useMaterial3: true,
-        ),
+        theme: ThemeManager.lightTheme,
         home: const HomeScreen(),
       ),
     );

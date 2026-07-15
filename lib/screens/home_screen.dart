@@ -5,22 +5,25 @@ import '../bloc/story_list/story_list_bloc.dart';
 import '../bloc/story_list/story_list_event.dart';
 import '../bloc/story_list/story_list_state.dart';
 import '../models/story.dart';
-import 'story_reader_screen.dart';
+import '../theme/app_assets.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_typography.dart';
+import '../theme/theme_manager.dart';
+import '../widgets/story_image.dart';
+import '../widgets/story_scaffold_background.dart';
+import '../widgets/stroke_text.dart';
+import 'story_hub_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.storyTheme;
+
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFFFF7D8), Color(0xFFFFE0B5), Color(0xFFD9F0F1)],
-          ),
-        ),
+      body: StoryScaffoldBackground(
+        overlayColor: AppColors.yellow50.withValues(alpha: 0.55),
         child: SafeArea(
           child: RefreshIndicator(
             onRefresh: () async {
@@ -34,9 +37,9 @@ class HomeScreen extends StatelessWidget {
             child: CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
-                const SliverToBoxAdapter(
+                SliverToBoxAdapter(
                   child: Padding(
-                    padding: EdgeInsets.fromLTRB(24, 28, 24, 8),
+                    padding: const EdgeInsets.fromLTRB(24, 28, 24, 8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -44,46 +47,43 @@ class HomeScreen extends StatelessWidget {
                           children: [
                             CircleAvatar(
                               radius: 26,
-                              backgroundColor: Color(0xFFFFD86B),
+                              backgroundColor: AppColors.yellow300,
                               child: Icon(
                                 Icons.auto_stories_rounded,
-                                color: Color(0xFF8F2D1B),
+                                color: theme.readingColor,
                                 size: 30,
                               ),
                             ),
-                            SizedBox(width: 12),
+                            const SizedBox(width: 12),
                             Expanded(
-                              child: Text(
-                                'Góc kể chuyện',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 34,
-                                  fontWeight: FontWeight.w900,
-                                  color: Color(0xFF2B2118),
+                              child: StrokeText(
+                                text: 'Góc kể chuyện',
+                                strokeColor: AppColors.strokeTitle,
+                                strokeWidth: 4,
+                                shadowOffset: const Offset(0, 3),
+                                shadowColor: AppColors.strokeTitleShadow,
+                                textStyle: theme.appTitle.copyWith(
+                                  color: AppColors.white,
+                                  fontSize: 30,
                                 ),
                               ),
                             ),
                           ],
                         ),
-                        SizedBox(height: 10),
+                        const SizedBox(height: 12),
                         DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                          decoration: theme.kidPanelInnerDecoration(
+                            standalone: true,
                           ),
                           child: Padding(
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                               horizontal: 12,
-                              vertical: 8,
+                              vertical: 10,
                             ),
                             child: Text(
                               'Chọn truyện, nghe giọng đọc và đọc chữ sáng lên.',
-                              style: TextStyle(
-                                fontSize: 15,
-                                height: 1.35,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF5C4A3D),
+                              style: theme.bodyMedium.copyWith(
+                                color: AppColors.textOrange,
                               ),
                             ),
                           ),
@@ -117,8 +117,7 @@ class HomeScreen extends StatelessWidget {
                               onTap: () {
                                 Navigator.of(context).push(
                                   MaterialPageRoute<void>(
-                                    builder: (_) =>
-                                        StoryReaderScreen(storyId: story.id),
+                                    builder: (_) => StoryHubScreen(story: story),
                                   ),
                                 );
                               },
@@ -146,88 +145,92 @@ class _StoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.storyTheme;
+
     return Material(
-      color: Colors.white.withValues(alpha: 0.84),
-      borderRadius: BorderRadius.circular(8),
-      elevation: 2,
-      shadowColor: const Color(0xFF8A4B20).withValues(alpha: 0.16),
+      color: AppColors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: theme.radiusStoryCard,
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Row(
-            children: [
-              _CoverThumb(imageUrl: story.imageUrl),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      story.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w900,
-                        color: Color(0xFF2B2118),
+        child: Ink(
+          decoration: theme.storyCardDecoration(),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(14),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      StoryImage(
+                        imageUrl: story.imageUrl,
+                        width: 82,
+                        height: 82,
+                        borderRadius: theme.radiusMedium,
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      story.author,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF7A6856),
+                      Image.asset(
+                        AppAssets.playButton,
+                        width: 40,
+                        height: 40,
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
+                    ],
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _StoryBadge(
-                          icon: Icons.star_rounded,
-                          label: 'Cấp ${story.level}',
-                          color: const Color(0xFF197C7B),
+                        Text(
+                          story.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.storyCardTitle,
                         ),
-                        _StoryBadge(
-                          icon: Icons.timer_rounded,
-                          label: '${story.durationMinutes} phút',
-                          color: const Color(0xFFC45C26),
+                        const SizedBox(height: 4),
+                        Text(
+                          story.author,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.bodySmall,
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: [
+                            _StoryBadge(
+                              icon: Icons.star_rounded,
+                              label: 'Cấp ${story.level}',
+                              color: theme.brandPrimary,
+                            ),
+                            _StoryBadge(
+                              iconAsset: AppAssets.storyTime,
+                              label: '${story.durationMinutes} phút',
+                              color: theme.readingColor,
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-              if (story.isFavorite)
-                const Padding(
-                  padding: EdgeInsets.only(right: 8),
-                  child: Icon(
-                    Icons.favorite_rounded,
-                    color: Color(0xFFD94B2B),
-                    size: 22,
                   ),
-                ),
-              Container(
-                width: 34,
-                height: 34,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFFD86B),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.play_arrow_rounded,
-                  color: Color(0xFF8F2D1B),
-                  size: 24,
-                ),
+                  if (story.isFavorite)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: Image.asset(
+                        AppAssets.heartIconActive,
+                        width: 28,
+                        height: 28,
+                      ),
+                    ),
+                  Image.asset(
+                    AppAssets.rightChevron,
+                    width: 20,
+                    height: 20,
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -237,12 +240,14 @@ class _StoryCard extends StatelessWidget {
 
 class _StoryBadge extends StatelessWidget {
   const _StoryBadge({
-    required this.icon,
+    this.icon,
+    this.iconAsset,
     required this.label,
     required this.color,
-  });
+  }) : assert(icon != null || iconAsset != null);
 
-  final IconData icon;
+  final IconData? icon;
+  final String? iconAsset;
   final String label;
   final Color color;
 
@@ -258,69 +263,14 @@ class _StoryBadge extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 15, color: color),
+            if (iconAsset != null)
+              Image.asset(iconAsset!, width: 15, height: 15)
+            else
+              Icon(icon, size: 15, color: color),
             const SizedBox(width: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: color,
-              ),
-            ),
+            Text(label, style: AppTypography.badge(color: color)),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _CoverThumb extends StatelessWidget {
-  const _CoverThumb({required this.imageUrl});
-
-  final String imageUrl;
-
-  @override
-  Widget build(BuildContext context) {
-    final isNetwork =
-        imageUrl.startsWith('http://') || imageUrl.startsWith('https://');
-    final isAsset = imageUrl.startsWith('assets/');
-
-    Widget child;
-    if (isNetwork) {
-      child = Image.network(
-        imageUrl,
-        width: 82,
-        height: 82,
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) =>
-            const Icon(Icons.menu_book_rounded, color: Color(0xFFB07A45)),
-      );
-    } else if (isAsset) {
-      child = Image.asset(
-        imageUrl,
-        width: 82,
-        height: 82,
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) =>
-            const Icon(Icons.menu_book_rounded, color: Color(0xFFB07A45)),
-      );
-    } else {
-      child = const Icon(
-        Icons.menu_book_rounded,
-        color: Color(0xFFB07A45),
-        size: 32,
-      );
-    }
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(18),
-      child: Container(
-        width: 82,
-        height: 82,
-        color: const Color(0xFFFFE8B8),
-        alignment: Alignment.center,
-        child: child,
       ),
     );
   }

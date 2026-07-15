@@ -1,97 +1,169 @@
 import 'package:flutter/material.dart';
 
-class StoryGameScreen extends StatelessWidget {
+import '../models/story.dart';
+import '../theme/app_assets.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_typography.dart';
+import '../theme/theme_manager.dart';
+import '../widgets/games/page_order_puzzle_game.dart';
+import '../widgets/story_back_button.dart';
+import '../widgets/story_scaffold_background.dart';
+import '../widgets/stroke_text.dart';
+
+class StoryGameScreen extends StatefulWidget {
   const StoryGameScreen({
     super.key,
-    required this.storyId,
     required this.storyTitle,
+    required this.pages,
   });
 
-  final int storyId;
   final String storyTitle;
+  final List<StoryPage> pages;
+
+  @override
+  State<StoryGameScreen> createState() => _StoryGameScreenState();
+}
+
+class _StoryGameScreenState extends State<StoryGameScreen> {
+  bool _showCelebration = false;
+
+  void _onPuzzleCompleted() {
+    if (_showCelebration) return;
+    setState(() => _showCelebration = true);
+    Future<void>.delayed(const Duration(seconds: 2), () {
+      if (!mounted) return;
+      setState(() => _showCelebration = false);
+    });
+  }
+
+  List<PagePuzzlePiece> get _pieces {
+    final sortedPages = [...widget.pages]
+      ..sort((a, b) => a.pageNumber.compareTo(b.pageNumber));
+
+    return sortedPages
+        .asMap()
+        .entries
+        .map(
+          (entry) => PagePuzzlePiece(
+            pageIndex: entry.key,
+            imageUrl: entry.value.imageUrl,
+          ),
+        )
+        .toList(growable: false);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.storyTheme;
+
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFFE8F8F2), Color(0xFFB8E8D8), Color(0xFF8FD4BE)],
+      body: StoryScaffoldBackground(
+        overlayColor: AppColors.yellow50.withValues(alpha: 0.35),
+        child: SafeArea(
+          child: Stack(
+            children: [
+              Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
+                    child: Row(
+                      children: [
+                        StoryBackButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.storyTitle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.sectionTitle,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Ghép hình theo thứ tự trang',
+                                style: theme.bodySmall,
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.extension_rounded,
+                          color: theme.playColor,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: PageOrderPuzzleGame(
+                      pieces: _pieces,
+                      onCompleted: _onPuzzleCompleted,
+                    ),
+                  ),
+                ],
+              ),
+              if (_showCelebration) const _PuzzleCelebrationOverlay(),
+            ],
           ),
         ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            child: Column(
-              children: [
-                Row(
+      ),
+    );
+  }
+}
+
+class _PuzzleCelebrationOverlay extends StatelessWidget {
+  const _PuzzleCelebrationOverlay();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.storyTheme;
+
+    return Positioned.fill(
+      child: IgnorePointer(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: theme.playColor.withValues(alpha: 0.12),
+          ),
+          child: Center(
+            child: DecoratedBox(
+              decoration: theme.storyCardDecoration(),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 22,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    IconButton.filledTonal(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.arrow_back_rounded),
-                      color: const Color(0xFF1F5C4A),
-                      style: IconButton.styleFrom(
-                        backgroundColor: const Color(0xFFD4F5E8),
+                    Image.asset(
+                      AppAssets.congratulation,
+                      width: 96,
+                      height: 96,
+                    ),
+                    const SizedBox(height: 12),
+                    StrokeText(
+                      text: 'Hoàn thành!',
+                      strokeColor: AppColors.strokeTitle,
+                      strokeWidth: 3,
+                      shadowOffset: const Offset(0, 2),
+                      shadowColor: AppColors.strokeTitleShadow,
+                      textStyle: AppTypography.sectionTitle(
+                        color: AppColors.white,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        storyTitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 19,
-                          fontWeight: FontWeight.w900,
-                          color: Color(0xFF1F3D34),
-                        ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Con đã ghép đúng hình rồi!',
+                      style: theme.bodyMedium.copyWith(
+                        color: theme.textSecondary,
                       ),
                     ),
                   ],
                 ),
-                const Spacer(),
-                const Icon(
-                  Icons.videogame_asset_rounded,
-                  size: 80,
-                  color: Color(0xFF1F5C4A),
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  'Game sắp ra mắt!',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w900,
-                    color: Color(0xFF1F3D34),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Phần chơi game cho câu chuyện #$storyId\nđang được phát triển.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    height: 1.45,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF4A6B60),
-                  ),
-                ),
-                const Spacer(),
-                FilledButton.icon(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.arrow_back_rounded),
-                  label: const Text('Quay lại'),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF1F5C4A),
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(double.infinity, 52),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),

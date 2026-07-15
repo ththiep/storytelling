@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme/theme_manager.dart';
+
 class KaraokeText extends StatelessWidget {
   const KaraokeText({
     super.key,
@@ -18,21 +20,10 @@ class KaraokeText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final base =
-        style ??
-        Theme.of(context).textTheme.headlineSmall?.copyWith(
-          height: 1.55,
-          fontWeight: FontWeight.w500,
-          color: const Color(0xFF2B2118),
-        ) ??
-        const TextStyle();
-    final active =
-        activeStyle ??
-        base.copyWith(
-          color: const Color(0xFFC45C26),
-          backgroundColor: const Color(0xFFFFE0B8),
-        );
-    final dim = dimStyle ?? base.copyWith(color: const Color(0xFF8A7A6B));
+    final theme = context.storyTheme;
+    final base = style ?? theme.karaoke;
+    final active = activeStyle ?? theme.karaokeActive;
+    final dim = dimStyle ?? theme.karaokeDim;
     final activePaint = _paintOnly(base, active);
     final dimPaint = _paintOnly(base, dim);
     final spans = <InlineSpan>[];
