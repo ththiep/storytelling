@@ -84,8 +84,9 @@ class _StoryReaderViewState extends State<_StoryReaderView> {
                     _ReaderControls(state: ready),
                   ],
                 ),
-                final StoryReaderCompleted completed =>
-                  StoryCompletionView(state: completed),
+                final StoryReaderCompleted completed => StoryCompletionView(
+                  state: completed,
+                ),
               };
             },
           ),
@@ -213,11 +214,7 @@ class _ReaderHeader extends StatelessWidget {
                   ],
                 ),
               ),
-              Image.asset(
-                AppAssets.storyBook,
-                width: 28,
-                height: 28,
-              ),
+              Image.asset(AppAssets.storyBook, width: 28, height: 28),
             ],
           ),
         ),
@@ -240,7 +237,7 @@ class _ReaderControls extends StatelessWidget {
         : state.isSpeaking
         ? 'Đang kể chuyện...'
         : state.isPaused
-        ? 'Tạm dừng một chút'
+        ? 'Tạm dừng'
         : 'Chạm nút để nghe tiếp';
 
     return Padding(
@@ -251,43 +248,89 @@ class _ReaderControls extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
           child: Row(
             children: [
-              _PlayButton(
-                isSpeaking: state.isSpeaking,
-                isFinished: state.isFinished,
-                onPressed: () {
-                  if (state.isFinished) {
-                    bloc.add(const StoryReaderReplayPressed());
-                  } else if (state.isSpeaking) {
-                    bloc.add(const StoryReaderPausePressed());
-                  } else {
-                    bloc.add(const StoryReaderPlayPressed());
-                  }
-                },
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: _AutoTurnPageSwitch(
+                    enabled: state.autoTurnPage,
+                    onChanged: (enabled) {
+                      bloc.add(StoryReaderAutoTurnPageToggled(enabled));
+                    },
+                  ),
+                ),
               ),
-              const SizedBox(width: 14),
               Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       status,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
                       style: theme.bodyMedium.copyWith(
                         color: theme.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 6),
-                    _AutoTurnPageSwitch(
-                      enabled: state.autoTurnPage,
-                      onChanged: (enabled) {
-                        bloc.add(StoryReaderAutoTurnPageToggled(enabled));
+                    _PlayButton(
+                      isSpeaking: state.isSpeaking,
+                      isFinished: state.isFinished,
+                      onPressed: () {
+                        if (state.isFinished) {
+                          bloc.add(const StoryReaderReplayPressed());
+                        } else if (state.isSpeaking) {
+                          bloc.add(const StoryReaderPausePressed());
+                        } else {
+                          bloc.add(const StoryReaderPlayPressed());
+                        }
                       },
                     ),
                   ],
                 ),
               ),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: _CompleteStoryButton(
+                    onPressed: () {
+                      bloc.add(const StoryReaderSkipToCompletedPressed());
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CompleteStoryButton extends StatelessWidget {
+  const _CompleteStoryButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.storyTheme;
+
+    return Material(
+      color: AppColors.transparent,
+      borderRadius: theme.radiusMedium,
+      child: InkWell(
+        borderRadius: theme.radiusMedium,
+        onTap: onPressed,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(AppAssets.completeStory, width: 24, height: 24),
+              const SizedBox(height: 4),
+              Text('Đọc xong', style: theme.caption),
             ],
           ),
         ),
@@ -306,31 +349,21 @@ class _AutoTurnPageSwitch extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = context.storyTheme;
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: AppColors.yellow100,
-        borderRadius: theme.radiusMedium,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(10, 4, 8, 4),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.auto_stories_rounded,
-              size: 16,
-              color: theme.readingColor,
-            ),
-            const SizedBox(width: 6),
-            Text('Tự lật trang', style: theme.caption),
-            const SizedBox(width: 6),
-            Switch(
-              value: enabled,
-              onChanged: onChanged,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-          ],
-        ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10, 4, 8, 4),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.auto_stories_rounded, size: 16, color: theme.readingColor),
+          const SizedBox(width: 6),
+          Text('Tự lật trang', style: theme.caption),
+          const SizedBox(width: 6),
+          Switch(
+            value: enabled,
+            onChanged: onChanged,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+        ],
       ),
     );
   }

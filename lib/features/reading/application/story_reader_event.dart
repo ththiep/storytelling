@@ -70,3 +70,7 @@ final class StoryReaderSpeakCompleted extends StoryReaderEvent {
 final class StoryReaderListenAgainPressed extends StoryReaderEvent {
   const StoryReaderListenAgainPressed();
 }
+
+final class StoryReaderSkipToCompletedPressed extends StoryReaderEvent {
+  const StoryReaderSkipToCompletedPressed();
+}

@@ -23,6 +23,7 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
     on<StoryReaderTimelineProgressed>(_onTimelineProgressed);
     on<StoryReaderSpeakCompleted>(_onSpeakCompleted);
     on<StoryReaderListenAgainPressed>(_onListenAgain);
+    on<StoryReaderSkipToCompletedPressed>(_onSkipToCompleted);
 
     _audioSub = _audio.events.listen(_onAudioEvent);
   }
@@ -181,10 +182,20 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
     if (!current.isSpeaking) return;
 
     emit(
-      StoryReaderCompleted(
-        story: current.story,
-        playback: current.playback,
-      ),
+      StoryReaderCompleted(story: current.story, playback: current.playback),
+    );
+  }
+
+  Future<void> _onSkipToCompleted(
+    StoryReaderSkipToCompletedPressed event,
+    Emitter<StoryReaderState> emit,
+  ) async {
+    final current = state;
+    if (current is! StoryReaderReady) return;
+
+    await _audio.stop();
+    emit(
+      StoryReaderCompleted(story: current.story, playback: current.playback),
     );
   }
 
