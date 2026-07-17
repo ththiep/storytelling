@@ -117,21 +117,21 @@ abstract final class AppTypography {
   );
 
   static TextStyle karaoke({Color? color}) => _mitr(
-    size: 30,
+    size: 16,
     weight: FontWeight.w700,
     height: 1.42,
     color: color ?? AppColors.textPrimary,
   );
 
   static TextStyle karaokeActive({Color? color}) => _mitr(
-    size: 30,
+    size: 16,
     weight: FontWeight.w700,
     height: 1.42,
     color: color ?? AppColors.karaokeActive,
   ).copyWith(backgroundColor: AppColors.yellow300);
 
   static TextStyle karaokeDim({Color? color}) => _mitr(
-    size: 30,
+    size: 16,
     weight: FontWeight.w700,
     height: 1.42,
     color: color ?? AppColors.karaokeDim,

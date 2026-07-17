@@ -9,6 +9,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 import '../theme/theme_manager.dart';
 import '../widgets/story_back_button.dart';
+import '../widgets/story_image.dart';
 import '../widgets/stroke_text.dart';
 import 'story_game_screen.dart';
 
@@ -45,14 +46,34 @@ class StoryCompletionView extends StatelessWidget {
                     child: Column(
                       children: [
                         const Spacer(),
-                        Image.asset(
-                          AppAssets.congratulation,
-                          width: 120,
-                          height: 120,
+                        SizedBox(
+                          width: 140,
+                          height: 170,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            clipBehavior: Clip.none,
+                            children: [
+                              StoryImage(
+                                imageUrl: state.story.imageUrl,
+                                width: 120,
+                                height: 150,
+                                borderRadius: theme.radiusMedium,
+                              ),
+                              Positioned(
+                                top: -20,
+                                child: Image.asset(
+                                  AppAssets.congratulation,
+                                  width: 100,
+                                  height: 100,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         const SizedBox(height: 16),
                         StrokeText(
                           text: 'Chúc mừng!',
+                          textAlign: TextAlign.center,
                           strokeColor: AppColors.strokeTitle,
                           strokeWidth: 4,
                           shadowOffset: const Offset(0, 3),

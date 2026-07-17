@@ -152,7 +152,7 @@ List<StoryVoice> _tooBigVoices() => const [
 List<StoryPage> _tooBigPages() => [
   StoryPage(
     pageNumber: 1,
-    imageUrl: 'assets/stories/too-big/page_1.png',
+    imageUrl: 'assets/stories/tg_page1.jpeg',
     startTimeMs: 0,
     endTimeMs: 14600,
     lines: [
@@ -219,7 +219,7 @@ List<StoryPage> _tooBigPages() => [
   ),
   StoryPage(
     pageNumber: 2,
-    imageUrl: 'assets/stories/too-big/page_2.png',
+    imageUrl: 'assets/stories/tg_page2.jpeg',
     startTimeMs: 15100,
     endTimeMs: 28160,
     lines: [
@@ -282,7 +282,7 @@ List<StoryPage> _tooBigPages() => [
   ),
   StoryPage(
     pageNumber: 3,
-    imageUrl: 'assets/stories/too-big/page_3.png',
+    imageUrl: 'assets/stories/tg_page3.png',
     startTimeMs: 28160,
     endTimeMs: 49800,
     lines: [

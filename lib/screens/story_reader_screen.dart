@@ -10,6 +10,7 @@ import '../theme/app_colors.dart';
 import '../theme/theme_manager.dart';
 import '../widgets/karaoke_text.dart';
 import '../widgets/story_back_button.dart';
+import '../widgets/story_image.dart';
 import '../widgets/story_scaffold_background.dart';
 import 'story_completion_screen.dart';
 
@@ -133,16 +134,29 @@ class _KaraokeReader extends StatelessWidget {
             child: DecoratedBox(
               decoration: theme.storyCardDecoration(),
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(18, 20, 18, 20),
-                child: Center(
-                  child: SingleChildScrollView(
-                    child: KaraokeText(
-                      text: page.displayText,
-                      activeWordIndex: state.activeWordIndex,
-                      style: theme.karaoke,
-                      activeStyle: theme.karaokeActive,
-                      dimStyle: theme.karaokeDim,
-                    ),
+                padding: const EdgeInsets.fromLTRB(14, 14, 14, 16),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      AspectRatio(
+                        aspectRatio: 4 / 3,
+                        child: StoryImage(
+                          imageUrl: page.imageUrl,
+                          width: double.infinity,
+                          height: double.infinity,
+                          borderRadius: theme.radiusMedium,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      KaraokeText(
+                        text: page.displayText,
+                        activeWordIndex: state.activeWordIndex,
+                        style: theme.karaoke,
+                        activeStyle: theme.karaokeActive,
+                        dimStyle: theme.karaokeDim,
+                      ),
+                    ],
                   ),
                 ),
               ),
