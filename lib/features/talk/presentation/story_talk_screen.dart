@@ -1,11 +1,16 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:storytelling/app/di/injection_container.dart';
 import 'package:storytelling/app/theme/app_assets.dart';
 import 'package:storytelling/app/theme/app_colors.dart';
 import 'package:storytelling/app/theme/app_typography.dart';
 import 'package:storytelling/app/theme/theme_manager.dart';
+import 'package:storytelling/features/talk/application/story_talk_bloc.dart';
+import 'package:storytelling/features/talk/application/story_talk_event.dart';
+import 'package:storytelling/features/talk/application/story_talk_state.dart';
 import 'package:storytelling/l10n/app_localizations.dart';
 import 'package:storytelling/shared/models/story.dart';
 import 'package:storytelling/shared/widgets/story_back_button.dart';
@@ -13,100 +18,115 @@ import 'package:storytelling/shared/widgets/story_image.dart';
 import 'package:storytelling/shared/widgets/story_scaffold_background.dart';
 import 'package:storytelling/shared/widgets/stroke_text.dart';
 
-class StoryTalkScreen extends StatefulWidget {
+class StoryTalkScreen extends StatelessWidget {
   const StoryTalkScreen({super.key, required this.story});
 
   final StoryDetail story;
 
   @override
-  State<StoryTalkScreen> createState() => _StoryTalkScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => getIt<StoryTalkBloc>()..add(StoryTalkStarted(story)),
+      child: const _StoryTalkView(),
+    );
+  }
 }
 
-class _StoryTalkScreenState extends State<StoryTalkScreen> {
-  int _pageIndex = 0;
-  bool _isListening = false;
-  final Set<int> _practicedPageIndexes = <int>{};
-
-  List<StoryPage> get _pages {
-    final pages = [...widget.story.pages]
-      ..sort((a, b) => a.pageNumber.compareTo(b.pageNumber));
-    return pages;
-  }
-
-  bool get _isComplete =>
-      _pages.isNotEmpty && _practicedPageIndexes.length == _pages.length;
-
-  void _togglePractice() {
-    setState(() {
-      if (_isListening) {
-        _isListening = false;
-        _practicedPageIndexes.add(_pageIndex);
-      } else {
-        _isListening = true;
-      }
-    });
-  }
-
-  void _goToPage(int nextIndex) {
-    if (nextIndex < 0 || nextIndex >= _pages.length) return;
-    setState(() {
-      _pageIndex = nextIndex;
-      _isListening = false;
-    });
-  }
+class _StoryTalkView extends StatelessWidget {
+  const _StoryTalkView();
 
   @override
   Widget build(BuildContext context) {
     final theme = context.storyTheme;
     final l10n = AppLocalizations.of(context);
-    final pages = _pages;
 
     return Scaffold(
       body: StoryScaffoldBackground(
         overlayColor: AppColors.purple100.withValues(alpha: 0.35),
         child: SafeArea(
-          child: Stack(
-            children: [
-              Column(
+          child: BlocConsumer<StoryTalkBloc, StoryTalkState>(
+            listenWhen: (previous, current) =>
+                previous.notice != current.notice && current.notice != null,
+            listener: (context, state) {
+              final message = switch (state.notice) {
+                TalkNotice.recordingFailed => l10n.talkRecordingError,
+                TalkNotice.playbackFailed => l10n.talkPlaybackError,
+                null => null,
+              };
+              if (message == null) return;
+              ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(SnackBar(content: Text(message)));
+            },
+            builder: (context, state) {
+              final pages = state.pages;
+              final page = state.currentPage;
+
+              return Stack(
                 children: [
-                  _TalkHeader(
-                    title: widget.story.title,
-                    subtitle: pages.isEmpty
-                        ? l10n.speakTitle
-                        : l10n.talkPageCount(_pageIndex + 1, pages.length),
-                  ),
-                  Expanded(
-                    child: pages.isEmpty
-                        ? Center(
-                            child: Text(
-                              l10n.talkEmpty,
-                              textAlign: TextAlign.center,
-                              style: theme.bodyMedium.copyWith(
-                                color: theme.textSecondary,
+                  Column(
+                    children: [
+                      _TalkHeader(
+                        title: state.story.title,
+                        subtitle: pages.isEmpty
+                            ? l10n.speakTitle
+                            : l10n.talkPageCount(
+                                state.pageIndex + 1,
+                                pages.length,
                               ),
-                            ),
-                          )
-                        : _TalkPracticePage(
-                            page: pages[_pageIndex],
-                            isListening: _isListening,
-                            isPracticed: _practicedPageIndexes.contains(
-                              _pageIndex,
-                            ),
-                          ),
+                      ),
+                      Expanded(
+                        child: page == null
+                            ? Center(
+                                child: Text(
+                                  l10n.talkEmpty,
+                                  textAlign: TextAlign.center,
+                                  style: theme.bodyMedium.copyWith(
+                                    color: theme.textSecondary,
+                                  ),
+                                ),
+                              )
+                            : _TalkPracticePage(
+                                page: page,
+                                isListening: state.isRecording,
+                                isPracticed: state.practicedPageIndexes
+                                    .contains(state.pageIndex),
+                              ),
+                      ),
+                      if (pages.isNotEmpty)
+                        _TalkControls(
+                          isListening: state.isRecording,
+                          isBusy: state.isBusy,
+                          hasRecording: state.hasRecording,
+                          canGoPrevious: state.pageIndex > 0,
+                          canGoNext: state.pageIndex < pages.length - 1,
+                          onPrevious: () {
+                            context.read<StoryTalkBloc>().add(
+                              StoryTalkPageChanged(state.pageIndex - 1),
+                            );
+                          },
+                          onNext: () {
+                            context.read<StoryTalkBloc>().add(
+                              StoryTalkPageChanged(state.pageIndex + 1),
+                            );
+                          },
+                          onTogglePractice: () {
+                            context.read<StoryTalkBloc>().add(
+                              const StoryTalkPracticeToggled(),
+                            );
+                          },
+                          onPlayRecording: () {
+                            context.read<StoryTalkBloc>().add(
+                              const StoryTalkRecordingPlaybackPressed(),
+                            );
+                          },
+                        ),
+                    ],
                   ),
-                  if (pages.isNotEmpty)
-                    _TalkControls(
-                      isListening: _isListening,
-                      canGoPrevious: _pageIndex > 0,
-                      canGoNext: _pageIndex < pages.length - 1,
-                      onPrevious: () => _goToPage(_pageIndex - 1),
-                      onNext: () => _goToPage(_pageIndex + 1),
-                      onTogglePractice: _togglePractice,
-                    ),
+                  if (state.isComplete) const _TalkCelebrationOverlay(),
                 ],
-              ),
-              if (_isComplete) const _TalkCelebrationOverlay(),
-            ],
+              );
+            },
           ),
         ),
       ),
@@ -255,19 +275,25 @@ class _TalkPracticePage extends StatelessWidget {
 class _TalkControls extends StatelessWidget {
   const _TalkControls({
     required this.isListening,
+    required this.isBusy,
+    required this.hasRecording,
     required this.canGoPrevious,
     required this.canGoNext,
     required this.onPrevious,
     required this.onNext,
     required this.onTogglePractice,
+    required this.onPlayRecording,
   });
 
   final bool isListening;
+  final bool isBusy;
+  final bool hasRecording;
   final bool canGoPrevious;
   final bool canGoNext;
   final VoidCallback onPrevious;
   final VoidCallback onNext;
   final VoidCallback onTogglePractice;
+  final VoidCallback onPlayRecording;
 
   @override
   Widget build(BuildContext context) {
@@ -288,13 +314,18 @@ class _TalkControls extends StatelessWidget {
                   child: _PageControlButton(
                     icon: Icons.chevron_left_rounded,
                     label: l10n.talkPrevious,
-                    onPressed: canGoPrevious ? onPrevious : null,
+                    onPressed: isBusy || isListening || !canGoPrevious
+                        ? null
+                        : onPrevious,
                   ),
                 ),
               ),
-              _TalkMicButton(
+              _TalkCenterControls(
                 isListening: isListening,
-                onPressed: onTogglePractice,
+                isBusy: isBusy,
+                hasRecording: hasRecording,
+                onTogglePractice: onTogglePractice,
+                onPlayRecording: onPlayRecording,
               ),
               Expanded(
                 child: Align(
@@ -302,7 +333,9 @@ class _TalkControls extends StatelessWidget {
                   child: _PageControlButton(
                     icon: Icons.chevron_right_rounded,
                     label: l10n.talkNext,
-                    onPressed: canGoNext ? onNext : null,
+                    onPressed: isBusy || isListening || !canGoNext
+                        ? null
+                        : onNext,
                   ),
                 ),
               ),
@@ -314,11 +347,20 @@ class _TalkControls extends StatelessWidget {
   }
 }
 
-class _TalkMicButton extends StatelessWidget {
-  const _TalkMicButton({required this.isListening, required this.onPressed});
+class _TalkCenterControls extends StatelessWidget {
+  const _TalkCenterControls({
+    required this.isListening,
+    required this.isBusy,
+    required this.hasRecording,
+    required this.onTogglePractice,
+    required this.onPlayRecording,
+  });
 
   final bool isListening;
-  final VoidCallback onPressed;
+  final bool isBusy;
+  final bool hasRecording;
+  final VoidCallback onTogglePractice;
+  final VoidCallback onPlayRecording;
 
   @override
   Widget build(BuildContext context) {
@@ -335,7 +377,7 @@ class _TalkMicButton extends StatelessWidget {
           shadowColor: AppColors.black10,
           child: InkWell(
             customBorder: const CircleBorder(),
-            onTap: onPressed,
+            onTap: isBusy ? null : onTogglePractice,
             child: SizedBox(
               width: 82,
               height: 82,
@@ -349,9 +391,21 @@ class _TalkMicButton extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         Text(
-          isListening ? l10n.talkStop : l10n.talkStart,
+          isListening
+              ? l10n.talkStop
+              : hasRecording
+              ? l10n.talkRecordAgain
+              : l10n.talkStart,
           style: theme.caption.copyWith(fontWeight: FontWeight.w900),
         ),
+        if (hasRecording && !isListening) ...[
+          const SizedBox(height: 4),
+          TextButton.icon(
+            onPressed: isBusy ? null : onPlayRecording,
+            icon: const Icon(Icons.play_arrow_rounded),
+            label: Text(l10n.talkPlayRecording),
+          ),
+        ],
       ],
     );
   }

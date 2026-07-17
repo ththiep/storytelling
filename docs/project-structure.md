@@ -31,7 +31,16 @@ storytelling/
 │   │   ├── audio/
 │   │   │   ├── audio_engine.dart         # just_audio + timeline
 │   │   │   └── narration_events.dart     # NarrationEvent types
+│   │   ├── recording/
+│   │   │   └── story_voice_recording_service.dart # record + playback
 │   │   └── utils/word_timing_utils.dart  # page/word index + StoryPlayback
+│   │
+│   ├── l10n/                             # Generated + ARB localizations
+│   │   ├── app_en.arb
+│   │   ├── app_vi.arb
+│   │   ├── app_localizations.dart
+│   │   ├── app_localizations_en.dart
+│   │   └── app_localizations_vi.dart
 │   │
 │   ├── shared/
 │   │   ├── models/story.dart             # Domain models
@@ -44,6 +53,7 @@ storytelling/
 │   │
 │   └── features/
 │       ├── catalog/
+│       │   ├── application/              # StoryListBloc + events/states
 │       │   ├── data/
 │       │   │   ├── dto/story_dto.dart
 │       │   │   ├── mock/mock_story_data.dart
@@ -51,8 +61,7 @@ storytelling/
 │       │   │   ├── story_repository.dart
 │       │   │   └── api_story_repository.dart
 │       │   └── presentation/
-│       │       ├── home_screen.dart      # Grid 2 cột, title ghim
-│       │       └── bloc/                 # StoryListBloc
+│       │       └── home_screen.dart      # Grid 2 cột, title ghim
 │       │
 │       ├── hub/
 │       │   └── presentation/story_hub_screen.dart
@@ -63,14 +72,19 @@ storytelling/
 │       │       ├── story_reader_screen.dart
 │       │       └── story_completion_screen.dart
 │       │
-│       └── play/
-│           └── presentation/
-│               ├── story_game_screen.dart
-│               └── widgets/page_order_puzzle_game.dart
+│       ├── play/
+│       │   └── presentation/
+│       │       ├── story_game_screen.dart
+│       │       └── widgets/page_order_puzzle_game.dart
+│       │
+│       └── talk/
+│           ├── application/              # StoryTalkBloc + events/states
+│           └── presentation/story_talk_screen.dart
 │
 ├── test/
 │   ├── story_dto_test.dart
 │   ├── story_list_bloc_test.dart
+│   ├── story_reader_bloc_test.dart
 │   ├── word_timing_utils_test.dart
 │   ├── page_order_puzzle_game_test.dart
 │   └── widget_test.dart
@@ -111,7 +125,7 @@ storytelling/
 └────────────────────────────┬─────────────────────────────┘
                              │
 ┌────────────────────────────▼─────────────────────────────┐
-│  features/catalog/data · core/audio/permissions · app/theme │
+│  features/catalog/data · core/audio/recording/permissions · app/theme │
 └────────────────────────────┬─────────────────────────────┘
                              │
               ┌──────────────┴──────────────┐
@@ -125,9 +139,35 @@ storytelling/
 | Layer | Location | Responsibility |
 |---|---|---|
 | **App shell** | `lib/app/` | DI, theme, `MaterialApp` |
-| **Core** | `lib/core/` | Network, audio, permissions, timing utils |
+| **Core** | `lib/core/` | Network, audio, recording, permissions, timing utils |
 | **Shared** | `lib/shared/` | Domain models + reusable widgets |
+| **Localization** | `lib/l10n/` | ARB source + generated `AppLocalizations` |
 | **Features** | `lib/features/<name>/` | Vertical slices: data / application / presentation |
+
+### Feature-first + BLoC convention
+
+Each feature owns its main flow and state:
+
+```text
+features/<feature>/
+  application/
+    <feature>_bloc.dart
+    <feature>_event.dart
+    <feature>_state.dart
+  data/            # only when the feature owns data access
+  presentation/
+    *_screen.dart
+    widgets/
+```
+
+Rules:
+
+- Each feature should have one primary BLoC when it owns non-trivial user flow or async state.
+- A complex screen inside a feature may add its own smaller BLoC under the same `application/` folder.
+- Presentation widgets render state and dispatch events; business flow, recording/audio state, loading, and errors live in BLoC.
+- Tiny widget-only interaction can stay local when it is isolated and disposable. Current example: `PageOrderPuzzleGame` keeps local drag/drop state until Play gains multi-round game flow.
+- Shared platform services stay in `core/`; shared models/widgets stay in `shared/`.
+- App strings go through `AppLocalizations`; add copy in both `app_en.arb` and `app_vi.arb`, then run `flutter gen-l10n`.
 
 ---
 
@@ -173,6 +213,7 @@ HomeScreen (catalog)
 - `StoryRepository` / `MockStoryRepository` / `ApiStoryRepository`
 - `StoryDetailDto` → `StoryDetail`
 - `mock_story_data.dart` — 6 catalog stories
+- `StoryListBloc` — catalog loading and refresh
 
 ### Reading
 
@@ -182,15 +223,26 @@ HomeScreen (catalog)
 ### Play
 
 - `StoryGameScreen` + `PageOrderPuzzleGame` (tap + drag)
+- Play does not yet have a feature-level BLoC because the current puzzle is a single local widget interaction. Add `features/play/application/StoryGameBloc` when implementing rounds, scoring, or persisted game progress.
 
 ### Talk
 
+- `StoryTalkBloc` — page navigation, recording state, playback, completion notices
 - `StoryTalkScreen` — v0 speaking practice.
 - Shows one story page at a time with image + large read-aloud text.
 - Child taps the mic button to start/stop a practice turn.
-- v0 records practice progress in memory only.
+- Records one reusable `latest.m4a` per story page through `StoryVoiceRecordingService`.
+- Shows a listen-again control when a page already has a recording.
 - Microphone permission is requested at app startup through `AppPermissionService`.
-- ASR, recording playback, and scoring are next slices.
+- ASR, scoring, parent review, and recording history are next slices.
+
+### Recording
+
+- `StoryVoiceRecordingService` wraps `record`, `path_provider`, and `just_audio`.
+- Files are stored under app documents:
+  `recordings/story_<storyId>/page_<pageNumber>/latest.m4a`.
+- New recordings first write to `recording.m4a`, then replace `latest.m4a` after a successful stop.
+- Playback uses the existing local file path with `just_audio`.
 
 ### Permissions
 
@@ -207,6 +259,14 @@ HomeScreen (catalog)
 final theme = context.storyTheme;
 Image.asset(AppAssets.playButton);
 ```
+
+### Localization
+
+- `l10n.yaml` configures Flutter localization generation.
+- Source files: `lib/l10n/app_en.arb`, `lib/l10n/app_vi.arb`.
+- Generated files are checked in under `lib/l10n/`.
+- `StorytellingApp` wires `AppLocalizations.delegate`, Flutter global delegates, and `supportedLocales`.
+- Current supported locales: `en`, `vi`.
 
 ---
 
@@ -238,7 +298,7 @@ flutter test
 | Play puzzle | ⚠️ | No multi-round chunking yet |
 | Per-story full packages | ⚠️ | Only `thanh-giong` complete |
 | Microphone permission | ✅ | Requested on startup through `AppPermissionService` |
-| Talk | 🚧 | v0 practice screen + mic permission, no recorder/ASR/scoring yet |
+| Talk | 🚧 | Record + listen again, no ASR/scoring/history yet |
 | Monetization | ❌ | Not started |
 
 ---
@@ -247,6 +307,9 @@ flutter test
 
 | Adding… | Put it in… |
 |---|---|
+| Feature BLoC/event/state | `features/<feature>/application/` |
+| Feature screen/widget | `features/<feature>/presentation/` |
+| Feature-owned data/API | `features/<feature>/data/` |
 | Catalog / list UI or BLoC | `features/catalog/` |
 | Hub UI | `features/hub/presentation/` |
 | Reader / completion | `features/reading/` |
@@ -255,7 +318,8 @@ flutter test
 | Shared widget | `shared/widgets/` |
 | Domain model | `shared/models/` |
 | Theme / UI asset path | `app/theme/` + `assets/ui/` |
-| Audio / network / permissions | `core/` |
+| Audio / network / recording / permissions | `core/` |
+| Localized copy | `lib/l10n/app_en.arb` + `lib/l10n/app_vi.arb` |
 | New story package | `assets/stories/<slug>/` (cover, `pages/`, audio) + mock/API |
 | Product requirements | `docs/spec/product-spec.md` |
 
@@ -264,7 +328,7 @@ flutter test
 ## 9. Suggested next steps
 
 1. Complete per-story packages (pages + timed text + audio) instead of reusing `thanh-giong`.
-2. Add real microphone capture and parent playback to Talk v1.
+2. Add parent review, deletion controls, and optional ASR/scoring to Talk v1.
 3. Split large UI files (`page_order_puzzle_game.dart`, reader screen) into smaller presentation widgets as they grow.
 4. Mirror `test/` under feature paths when coverage expands.
 

@@ -380,6 +380,30 @@ abstract class AppLocalizations {
   /// **'Done'**
   String get talkStop;
 
+  /// No description provided for @talkRecordAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get talkRecordAgain;
+
+  /// No description provided for @talkPlayRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen'**
+  String get talkPlayRecording;
+
+  /// No description provided for @talkRecordingError.
+  ///
+  /// In en, this message translates to:
+  /// **'Oops, I could not record. Try again.'**
+  String get talkRecordingError;
+
+  /// No description provided for @talkPlaybackError.
+  ///
+  /// In en, this message translates to:
+  /// **'Oops, I could not play it.'**
+  String get talkPlaybackError;
+
   /// No description provided for @talkNext.
   ///
   /// In en, this message translates to:

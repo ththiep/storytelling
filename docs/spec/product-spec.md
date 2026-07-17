@@ -161,7 +161,7 @@ Rules of thumb:
 
 - 🚧 Talk v0 UI  
 - ✅ Startup microphone permission  
-- ⬜ Real mic capture / recording playback  
+- ✅ Real mic capture / recording playback  
 - ⬜ Mic capture + evaluation pipeline  
 - ⬜ Parent listen / review flow  
 
@@ -171,18 +171,33 @@ Talk starts without scoring so the experience feels safe for young children:
 
 - Show one page image and its text in large type.
 - Child taps one large mic button to practice that page.
-- Stop marks the page as practiced.
+- Stop saves that page recording as `latest.m4a`.
+- If a page has a recording, child can tap listen again.
 - Page controls let the child move through the story.
 - Completing all pages shows a gentle celebration.
 - App requests microphone permission at startup through a shared permission service.
-- No actual recording, ASR, grading, cloud upload, or recording persistence yet.
+- No ASR, grading, cloud upload, recording history, or parent review yet.
+
+#### Local recording storage
+
+The app stores recordings locally and privately in the app documents directory:
+
+```text
+ApplicationDocuments/
+  recordings/
+    story_<storyId>/
+      page_<pageNumber>/
+        latest.m4a
+```
+
+Only one reusable recording is kept per story/page for now. Recording again replaces `latest.m4a` after the new file is successfully saved.
 
 #### Permission and privacy baseline
 
 - Microphone permission is requested once when the app starts.
 - Permission logic lives in `AppPermissionService`, not inside Talk UI.
 - Native permission strings must explain child read-aloud practice clearly.
-- If permission is denied, Talk v1 should still show practice text and provide a gentle parent-facing prompt before recording.
+- If permission is denied, Talk should still show practice text and provide a gentle parent-facing prompt before recording.
 
 ---
 

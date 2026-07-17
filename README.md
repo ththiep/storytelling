@@ -2,6 +2,9 @@
 
 Flutter app for child-friendly interactive storytelling.
 
+Architecture: **feature-first + BLoC pattern**, with shared platform services
+under `core/` and reusable models/widgets under `shared/`.
+
 The app is organized around three story modes:
 
 - **Read**: narrated audio with page images and karaoke word highlighting.
@@ -16,18 +19,33 @@ The app is organized around three story modes:
 | Story hub | Available |
 | Read mode | Audio, karaoke text, manual swipe, auto page |
 | Play mode | Page-order puzzle |
-| Talk mode | v0 practice screen + startup microphone permission |
+| Talk mode | Record latest page audio + listen again |
 | Localization | English and Vietnamese |
 
 ## Permissions
 
 The app requests microphone permission at startup so Talk can record the
-child reading aloud in the next slice.
+child reading aloud.
 
 - Permission service: `lib/core/permissions/app_permission_service.dart`
 - Android: `RECORD_AUDIO`
 - iOS/macOS: `NSMicrophoneUsageDescription`
 - iOS: `PERMISSION_MICROPHONE=1` in `ios/Podfile`
+
+## Recordings
+
+Talk saves one reusable recording per story page:
+
+```text
+ApplicationDocuments/
+  recordings/
+    story_<storyId>/
+      page_<pageNumber>/
+        latest.m4a
+```
+
+When the child records again, the app writes a temp file first and replaces
+`latest.m4a` only after recording stops successfully.
 
 ## Run
 

@@ -1,8 +1,8 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:storytelling/features/catalog/presentation/bloc/story_list_bloc.dart';
-import 'package:storytelling/features/catalog/presentation/bloc/story_list_event.dart';
-import 'package:storytelling/features/catalog/presentation/bloc/story_list_state.dart';
+import 'package:storytelling/features/catalog/application/story_list_bloc.dart';
+import 'package:storytelling/features/catalog/application/story_list_event.dart';
+import 'package:storytelling/features/catalog/application/story_list_state.dart';
 import 'package:storytelling/app/di/injection_container.dart';
 
 void main() {

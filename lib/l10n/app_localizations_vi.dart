@@ -167,6 +167,18 @@ class AppLocalizationsVi extends AppLocalizations {
   String get talkStop => 'Xong rồi';
 
   @override
+  String get talkRecordAgain => 'Ghi lại';
+
+  @override
+  String get talkPlayRecording => 'Nghe lại';
+
+  @override
+  String get talkRecordingError => 'Ôi, chưa ghi được. Thử lại nhé.';
+
+  @override
+  String get talkPlaybackError => 'Ôi, chưa nghe lại được.';
+
+  @override
   String get talkNext => 'Tiếp';
 
   @override

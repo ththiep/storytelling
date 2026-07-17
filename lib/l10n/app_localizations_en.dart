@@ -167,6 +167,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get talkStop => 'Done';
 
   @override
+  String get talkRecordAgain => 'Try again';
+
+  @override
+  String get talkPlayRecording => 'Listen';
+
+  @override
+  String get talkRecordingError => 'Oops, I could not record. Try again.';
+
+  @override
+  String get talkPlaybackError => 'Oops, I could not play it.';
+
+  @override
   String get talkNext => 'Next';
 
   @override
