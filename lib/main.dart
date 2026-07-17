@@ -1,31 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'bloc/story_list/story_list_bloc.dart';
-import 'bloc/story_list/story_list_event.dart';
-import 'di/injection_container.dart';
-import 'screens/home_screen.dart';
-import 'theme/theme_manager.dart';
+import 'app/di/injection_container.dart';
+import 'app/storytelling_app.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await configureDependencies();
   runApp(const StorytellingApp());
-}
-
-class StorytellingApp extends StatelessWidget {
-  const StorytellingApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<StoryListBloc>()..add(const StoryListStarted()),
-      child: MaterialApp(
-        title: 'Kể chuyện',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeManager.lightTheme,
-        home: const HomeScreen(),
-      ),
-    );
-  }
 }

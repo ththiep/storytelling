@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:storytelling/di/injection_container.dart';
-import 'package:storytelling/main.dart';
-import 'package:storytelling/widgets/stroke_text.dart';
+import 'package:storytelling/app/di/injection_container.dart';
+import 'package:storytelling/app/storytelling_app.dart';
+import 'package:storytelling/shared/widgets/stroke_text.dart';
 
 void main() {
   setUp(() async {

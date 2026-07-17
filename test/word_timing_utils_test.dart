@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:storytelling/models/story.dart';
-import 'package:storytelling/utils/word_timing_utils.dart';
+import 'package:storytelling/shared/models/story.dart';
+import 'package:storytelling/core/utils/word_timing_utils.dart';
 
 void main() {
   test('pageIndexAt and wordIndexAt follow page timelines', () {

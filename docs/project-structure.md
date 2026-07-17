@@ -1,7 +1,8 @@
 # Project Structure
 
-> Last updated: 2026-07-15  
-> Flutter app: interactive storytelling (Reading / Play / Speaking)
+> Last updated: 2026-07-17  
+> Flutter app: interactive storytelling (Reading / Play / Speaking)  
+> Layout: **feature-first** (`app` / `core` / `shared` / `features`)
 
 ---
 
@@ -9,80 +10,91 @@
 
 ```text
 storytelling/
-├── lib/                          # Application source code
-│   ├── main.dart                 # App entry, MaterialApp, global BLoC providers
+├── lib/
+│   ├── main.dart
 │   │
-│   ├── bloc/                     # BLoC state management
-│   │   ├── story_list/           # Home story catalog
-│   │   └── story_reader/         # Reading session (pages, audio, completion)
+│   ├── app/                              # App shell
+│   │   ├── storytelling_app.dart         # MaterialApp + StoryListBloc provider
+│   │   ├── di/injection_container.dart   # get_it
+│   │   └── theme/
+│   │       ├── app_assets.dart
+│   │       ├── app_colors.dart
+│   │       ├── app_typography.dart
+│   │       ├── storytelling_theme.dart
+│   │       └── theme_manager.dart
 │   │
-│   ├── core/                     # Cross-cutting infrastructure
-│   │   ├── config/               # API config (base URL, flags)
-│   │   └── network/              # Dio client, API exceptions
+│   ├── core/                             # Cross-cutting infrastructure
+│   │   ├── config/api_config.dart
+│   │   ├── network/                      # Dio, ApiException
+│   │   ├── audio/
+│   │   │   ├── audio_engine.dart         # just_audio + timeline
+│   │   │   └── narration_events.dart     # NarrationEvent types
+│   │   └── utils/word_timing_utils.dart  # page/word index + StoryPlayback
 │   │
-│   ├── data/                     # Data layer
-│   │   ├── dto/                  # JSON DTOs + mapping to domain models
-│   │   ├── mock/                 # Local mock stories for dev / tests
-│   │   ├── remote/               # REST API service (Dio)
-│   │   ├── api_story_repository.dart
-│   │   └── story_repository.dart # Repository interface + mock impl
+│   ├── shared/
+│   │   ├── models/story.dart             # Domain models
+│   │   └── widgets/                      # Cross-feature UI
+│   │       ├── karaoke_text.dart
+│   │       ├── story_image.dart
+│   │       ├── story_back_button.dart
+│   │       ├── story_scaffold_background.dart
+│   │       └── stroke_text.dart
 │   │
-│   ├── di/                       # Dependency injection (get_it)
-│   │   └── injection_container.dart
-│   │
-│   ├── models/                   # Domain models
-│   │   └── story.dart            # StoryDetail, StoryPage, StoryLine, StoryWord…
-│   │
-│   ├── screens/                  # Full-screen UI flows
-│   │   ├── home_screen.dart              # Story list
-│   │   ├── story_hub_screen.dart         # 3 modes: Reading / Play / Speaking
-│   │   ├── story_reader_screen.dart      # Reading + karaoke
-│   │   ├── story_completion_screen.dart  # Post-reading celebration
-│   │   └── story_game_screen.dart        # Play mode shell
-│   │
-│   ├── services/                 # Platform / media services
-│   │   ├── audio_engine.dart     # just_audio playback + timeline events
-│   │   └── narration_engine.dart # Narration event types
-│   │
-│   ├── theme/                    # Design system
-│   │   ├── app_colors.dart       # Raw color palette
-│   │   ├── app_typography.dart   # Text styles
-│   │   ├── storytelling_theme.dart # ThemeExtension tokens
-│   │   └── theme_manager.dart    # ThemeData builder + context.storyTheme
-│   │
-│   ├── utils/                    # Pure helpers
-│   │   └── word_timing_utils.dart # Page/word index from audio position
-│   │
-│   └── widgets/                  # Reusable UI components
-│       ├── karaoke_text.dart
-│       ├── story_image.dart
-│       └── games/
-│           └── page_order_puzzle_game.dart
+│   └── features/
+│       ├── catalog/
+│       │   ├── data/
+│       │   │   ├── dto/story_dto.dart
+│       │   │   ├── mock/mock_story_data.dart
+│       │   │   ├── remote/story_api_service.dart
+│       │   │   ├── story_repository.dart
+│       │   │   └── api_story_repository.dart
+│       │   └── presentation/
+│       │       ├── home_screen.dart      # Grid 2 cột, title ghim
+│       │       └── bloc/                 # StoryListBloc
+│       │
+│       ├── hub/
+│       │   └── presentation/story_hub_screen.dart
+│       │
+│       ├── reading/
+│       │   ├── application/              # StoryReaderBloc + events/states
+│       │   └── presentation/
+│       │       ├── story_reader_screen.dart
+│       │       └── story_completion_screen.dart
+│       │
+│       └── play/
+│           └── presentation/
+│               ├── story_game_screen.dart
+│               └── widgets/page_order_puzzle_game.dart
 │
-├── test/                         # Unit & widget tests
+├── test/
 │   ├── story_dto_test.dart
 │   ├── story_list_bloc_test.dart
 │   ├── word_timing_utils_test.dart
 │   ├── page_order_puzzle_game_test.dart
 │   └── widget_test.dart
 │
-├── assets/                       # Bundled story media
-│   └── stories/
-│       └── too-big/              # Mock story id: 8
-│           ├── audio.m4a
-│           ├── cover.png
-│           ├── page_1.png … page_3.png
-│           └── text.txt
+├── assets/
+│   ├── stories/
+│   │   ├── thanh-giong/                  # Full demo package
+│   │   │   ├── cover.jpg
+│   │   │   ├── audio.m4a
+│   │   │   └── pages/page_1.jpeg … page_3.png
+│   │   ├── de-men-phieu-luu-ky/cover.jpeg
+│   │   ├── cay-khe/cover.jpg
+│   │   ├── hoa-tan/cover.jpeg
+│   │   ├── ai-han-mieu-thanh-huong/cover.jpeg
+│   │   └── huyet-sac/cover.jpeg
+│   └── ui/
+│       ├── backgrounds/story_background.png
+│       └── icons/                        # play/pause/back/heart/… + congratulation.gif
 │
-├── docs/                         # Product & engineering docs
-│   ├── spec/
-│   │   └── product-spec.md
-│   ├── brainstorming/
-│   │   └── interactive-storytelling-brainstorm.md
-│   └── project-structure.md      # This file
+├── docs/
+│   ├── spec/product-spec.md
+│   ├── brainstorming/interactive-storytelling-brainstorm.md
+│   └── project-structure.md
 │
-├── android/ ios/ macos/ linux/ windows/ web/   # Platform runners
-├── pubspec.yaml                  # Dependencies & asset manifest
+├── android/ ios/ macos/ linux/ windows/ web/
+├── pubspec.yaml
 └── README.md
 ```
 
@@ -91,139 +103,121 @@ storytelling/
 ## 2. Architecture layers
 
 ```text
-┌─────────────────────────────────────────────────────────┐
-│  Screens / Widgets                                      │
-│  home → hub → reader | game | (speaking TBD)            │
-└───────────────────────────┬─────────────────────────────┘
-                            │ context.read<Bloc>()
-┌───────────────────────────▼─────────────────────────────┐
-│  BLoC                                                   │
-│  StoryListBloc · StoryReaderBloc                        │
-└───────────────────────────┬─────────────────────────────┘
-                            │
-        ┌───────────────────┼───────────────────┐
-        ▼                   ▼                   ▼
-┌───────────────┐   ┌───────────────┐   ┌───────────────┐
-│ StoryRepository│   │ AudioEngine   │   │ ThemeManager  │
-│ (mock / API)   │   │ (just_audio)  │   │ (design tokens)│
-└───────┬───────┘   └───────────────┘   └───────────────┘
-        │
-        ▼
-┌───────────────┐
-│ StoryApiService│──► Dio ──► REST backend (optional)
-│ MockStoryData  │──► assets/stories/
-└───────────────┘
+┌──────────────────────────────────────────────────────────┐
+│  features/*/presentation (+ application BLoCs)           │
+│  catalog → hub → reading | play | (speaking TBD)         │
+└────────────────────────────┬─────────────────────────────┘
+                             │
+┌────────────────────────────▼─────────────────────────────┐
+│  features/catalog/data  ·  core/audio  ·  app/theme      │
+└────────────────────────────┬─────────────────────────────┘
+                             │
+              ┌──────────────┴──────────────┐
+              ▼                             ▼
+     MockStoryRepository            StoryApiService → Dio
+              │
+              ▼
+     assets/stories/<slug>/
 ```
 
-| Layer | Responsibility |
-|---|---|
-| **Screens** | Navigation, layout, user actions |
-| **BLoC** | Business logic, async flows, UI state |
-| **Repository** | Fetch `StoryDetail`; hide mock vs API |
-| **DTO** | Parse API JSON (`snake_case`) → domain models |
-| **Services** | Audio playback, timeline progress events |
-| **Theme** | Colors, typography, gradients via `context.storyTheme` |
-| **Widgets** | Shared UI + game components |
+| Layer | Location | Responsibility |
+|---|---|---|
+| **App shell** | `lib/app/` | DI, theme, `MaterialApp` |
+| **Core** | `lib/core/` | Network, audio, timing utils |
+| **Shared** | `lib/shared/` | Domain models + reusable widgets |
+| **Features** | `lib/features/<name>/` | Vertical slices: data / application / presentation |
 
 ---
 
-## 3. Navigation flow (current)
+## 3. Navigation flow
 
 ```text
-HomeScreen (story list)
+HomeScreen (catalog)
+  · pinned "Góc kể chuyện"
+  · 2-column cover grid (+ favorite heart)
     └── StoryHubScreen
-            ├── Reading  → StoryReaderScreen
-            │                 └── StoryCompletionView (on finish)
-            │                       ├── Listen again
-            │                       └── Play → StoryGameScreen
-            ├── Play     → StoryGameScreen
-            │                 └── PageOrderPuzzleGame
-            └── Speaking → (not implemented)
+            ├── Reading → StoryReaderScreen
+            │               · page image + KaraokeText
+            │               └── StoryCompletionView
+            │                     · cover + congratulation GIF
+            │                     · listen again / play
+            ├── Play → StoryGameScreen → PageOrderPuzzleGame
+            └── Speaking → placeholder
 ```
 
 ---
 
-## 4. Key modules
+## 4. Story packages (`assets/stories/`)
 
-### `lib/models/story.dart`
+| Slug folder | Title | Package contents |
+|---|---|---|
+| `thanh-giong/` | Thánh Gióng | cover + pages + audio |
+| `de-men-phieu-luu-ky/` | Dế Mèn phiêu lưu ký | cover only |
+| `cay-khe/` | Cây Khế | cover only |
+| `hoa-tan/` | Hoa Tàn | cover only |
+| `ai-han-mieu-thanh-huong/` | Ái hận miêu thành hương | cover only |
+| `huyet-sac/` | Huyết Sắc | cover only |
 
-Domain model aligned with API:
+**Prototype note:** catalog entries without their own pages/audio temporarily reuse `thanh-giong` pages + audio in `mock_story_data.dart`.
 
-- `StoryDetail` — metadata, voices, pages
-- `StoryPage` — `imageUrl`, karaoke lines, page timing
-- `StoryLine` / `StoryWord` — text + `startTimeMs` / `endTimeMs`
-- `StoryVoice` — audio URL + duration
+`pubspec.yaml` registers each story folder (and `thanh-giong/pages/`) plus `assets/ui/...`.
 
-### `lib/bloc/story_reader/`
+---
 
-| File | Role |
-|---|---|
-| `story_reader_bloc.dart` | Load story, play/pause, page change, completion |
-| `story_reader_state.dart` | `Ready`, `Completed`, `Loading`, `Failure` |
-| `story_reader_event.dart` | User + audio timeline events |
+## 5. Key modules
 
-### `lib/services/audio_engine.dart`
+### Catalog data
 
-- Plays story audio (asset or network)
-- Emits `NarrationTimelineProgress` for karaoke sync
-- Fires `NarrationCompleted` → reader completion state
+- `StoryRepository` / `MockStoryRepository` / `ApiStoryRepository`
+- `StoryDetailDto` → `StoryDetail`
+- `mock_story_data.dart` — 6 catalog stories
 
-### `lib/theme/`
+### Reading
 
-Centralized design tokens. Use in widgets:
+- `StoryReaderBloc` — load, play/pause, page change, completion, listen again
+- Reader UI — image above karaoke; companion chrome via `AppAssets`
+
+### Play
+
+- `StoryGameScreen` + `PageOrderPuzzleGame` (tap + drag)
+
+### Theme
 
 ```dart
 final theme = context.storyTheme;
-Text('Title', style: theme.screenTitle);
+Image.asset(AppAssets.playButton);
 ```
-
-### `lib/di/injection_container.dart`
-
-Registers via `get_it`:
-
-- `StoryRepository` (mock by default; `useRemoteApi: true` for API)
-- `StoryListBloc`, `StoryReaderBloc` (factory)
-- `AudioEngine` (factory per reader session)
-
----
-
-## 5. Data sources
-
-| Source | When | Entry |
-|---|---|---|
-| **Mock** | Default dev / tests | `MockStoryRepository` → `mock_story_data.dart` |
-| **REST API** | `configureDependencies(useRemoteApi: true)` | `ApiStoryRepository` → `StoryApiService` |
-| **Assets** | Story media | `assets/stories/<slug>/` declared in `pubspec.yaml` |
 
 ---
 
 ## 6. Tests
 
-| Test file | Covers |
+| File | Covers |
 |---|---|
-| `story_dto_test.dart` | API JSON parsing |
-| `word_timing_utils_test.dart` | Karaoke page/word index |
-| `story_list_bloc_test.dart` | Catalog loading |
+| `story_dto_test.dart` | DTO parsing |
+| `word_timing_utils_test.dart` | Karaoke indexes |
+| `story_list_bloc_test.dart` | Catalog load (6 stories) |
 | `page_order_puzzle_game_test.dart` | Puzzle piece model |
-| `widget_test.dart` | Home list + hub navigation |
+| `widget_test.dart` | Home + hub navigation |
 
-Run: `flutter test`
+```bash
+flutter test
+```
 
 ---
 
-## 7. Implementation status by folder
+## 7. Implementation status
 
 | Area | Status | Notes |
 |---|---|---|
-| `screens/home_screen.dart` | ✅ | Story list |
-| `screens/story_hub_screen.dart` | ✅ | 3-mode entry; Speaking disabled |
-| `screens/story_reader_screen.dart` | ✅ | Karaoke; page images not shown yet |
-| `screens/story_completion_screen.dart` | ✅ | Listen again + Play |
-| `screens/story_game_screen.dart` | ✅ | Page-order puzzle |
-| `widgets/games/` | ⚠️ | v1 puzzle only; no multi-round chunking |
-| `theme/` | ✅ | ThemeManager wired; some screens not migrated |
-| Speaking screens | ❌ | Not started |
-| Monetization / IAP | ❌ | Not started |
+| Catalog home grid | ✅ | Feature `catalog` |
+| Story hub | ✅ | Feature `hub` |
+| Reading + karaoke + page image | ✅ | Feature `reading` |
+| Completion celebration | ✅ | Cover + GIF overlay |
+| Play puzzle | ⚠️ | No multi-round chunking yet |
+| Per-story full packages | ⚠️ | Only `thanh-giong` complete |
+| Speaking | ❌ | Placeholder |
+| Monetization | ❌ | Not started |
 
 ---
 
@@ -231,14 +225,25 @@ Run: `flutter test`
 
 | Adding… | Put it in… |
 |---|---|
-| New screen | `lib/screens/` |
-| New mini-game | `lib/widgets/games/` |
-| New BLoC | `lib/bloc/<feature>/` |
-| API field / model | `lib/data/dto/` + `lib/models/` |
-| Color / text style | `lib/theme/` |
-| Shared widget | `lib/widgets/` |
-| Story assets | `assets/stories/<slug>/` + `pubspec.yaml` |
+| Catalog / list UI or BLoC | `features/catalog/` |
+| Hub UI | `features/hub/presentation/` |
+| Reader / completion | `features/reading/` |
+| New mini-game | `features/play/presentation/widgets/` |
+| Shared widget | `shared/widgets/` |
+| Domain model | `shared/models/` |
+| Theme / UI asset path | `app/theme/` + `assets/ui/` |
+| Audio / network | `core/` |
+| New story package | `assets/stories/<slug>/` (cover, `pages/`, audio) + mock/API |
 | Product requirements | `docs/spec/product-spec.md` |
+
+---
+
+## 9. Suggested next steps
+
+1. Complete per-story packages (pages + timed text + audio) instead of reusing `thanh-giong`.
+2. Add `features/speaking/` when starting Speaking v0.
+3. Split large UI files (`page_order_puzzle_game.dart`, reader screen) into smaller presentation widgets as they grow.
+4. Mirror `test/` under feature paths when coverage expands.
 
 ---
 

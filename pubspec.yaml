@@ -27,7 +27,12 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/stories/
-    - assets/stories/too-big/
+    - assets/stories/thanh-giong/
+    - assets/stories/thanh-giong/pages/
+    - assets/stories/de-men-phieu-luu-ky/
+    - assets/stories/cay-khe/
+    - assets/stories/hoa-tan/
+    - assets/stories/ai-han-mieu-thanh-huong/
+    - assets/stories/huyet-sac/
     - assets/ui/backgrounds/
     - assets/ui/icons/
