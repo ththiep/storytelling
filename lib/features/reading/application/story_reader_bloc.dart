@@ -2,10 +2,11 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:storytelling/features/catalog/data/story_repository.dart';
 import 'package:storytelling/core/audio/audio_engine.dart';
 import 'package:storytelling/core/audio/narration_events.dart';
+import 'package:storytelling/core/logging/app_logger.dart';
 import 'package:storytelling/core/utils/word_timing_utils.dart';
+import 'package:storytelling/features/catalog/data/story_repository.dart';
 import 'story_reader_event.dart';
 import 'story_reader_state.dart';
 
@@ -35,6 +36,7 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
   void _onAudioEvent(NarrationEvent event) {
     switch (event) {
       case NarrationStarted():
+        AppLogger.info('reader', 'Narration started');
         break;
       case NarrationTimelineProgress(:final pageIndex, :final wordIndex):
         add(
@@ -44,8 +46,10 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
           ),
         );
       case NarrationCompleted():
+        AppLogger.info('reader', 'Narration completed event received');
         add(const StoryReaderSpeakCompleted());
       case NarrationPaused():
+        AppLogger.info('reader', 'Narration paused event received');
         break;
     }
   }
@@ -54,11 +58,17 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
     StoryReaderStarted event,
     Emitter<StoryReaderState> emit,
   ) async {
+    AppLogger.info('reader', 'Starting reader storyId=${event.storyId}');
     emit(const StoryReaderLoading());
     try {
       await _audio.prepare();
       final story = await _repository.fetchStoryById(event.storyId);
       final playback = StoryPlayback.fromDetail(story);
+      AppLogger.info(
+        'reader',
+        'Reader ready storyId=${story.id} pages=${playback.pages.length} '
+            'durationMs=${playback.durationMs}',
+      );
       emit(
         StoryReaderReady(
           story: story,
@@ -70,7 +80,13 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
         ),
       );
       add(const StoryReaderPlayPressed());
-    } catch (error) {
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        'reader',
+        'Failed to start reader storyId=${event.storyId}',
+        error: error,
+        stackTrace: stackTrace,
+      );
       emit(StoryReaderFailure(error.toString()));
     }
   }
@@ -82,14 +98,22 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
     final current = state;
     if (current is! StoryReaderReady) return;
     if (current.isPaused) {
+      AppLogger.info('reader', 'Resume pressed pageIndex=${current.pageIndex}');
       emit(current.copyWith(status: ReaderStatus.speaking));
       try {
         await _audio.resume();
-      } catch (error) {
+      } catch (error, stackTrace) {
+        AppLogger.error(
+          'reader',
+          'Failed to resume playback',
+          error: error,
+          stackTrace: stackTrace,
+        );
         emit(StoryReaderFailure(error.toString()));
       }
       return;
     }
+    AppLogger.info('reader', 'Play pressed pageIndex=${current.pageIndex}');
     await _startPlayback(emit, current);
   }
 
@@ -99,6 +123,7 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
   ) async {
     final current = state;
     if (current is! StoryReaderReady || !current.isSpeaking) return;
+    AppLogger.info('reader', 'Pause pressed pageIndex=${current.pageIndex}');
     await _audio.pause();
     emit(current.copyWith(status: ReaderStatus.paused));
   }
@@ -109,6 +134,7 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
   ) async {
     final current = state;
     if (current is! StoryReaderReady) return;
+    AppLogger.info('reader', 'Replay pressed storyId=${current.story.id}');
     await _startPlayback(emit, current);
   }
 
@@ -116,6 +142,7 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
     StoryReaderClosed event,
     Emitter<StoryReaderState> emit,
   ) async {
+    AppLogger.info('reader', 'Reader closed');
     await _audio.stop();
   }
 
@@ -131,6 +158,10 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
     }
     if (current.pageIndex == event.pageIndex) return;
 
+    AppLogger.info(
+      'reader',
+      'Manual page change ${current.pageIndex} -> ${event.pageIndex}',
+    );
     emit(current.copyWith(pageIndex: event.pageIndex, activeWordIndex: -1));
     await _audio.seekTo(current.playback.pages[event.pageIndex].startTimeMs);
   }
@@ -143,6 +174,7 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
     if (current is! StoryReaderReady) return;
     if (current.autoTurnPage == event.enabled) return;
 
+    AppLogger.info('reader', 'Auto page toggled enabled=${event.enabled}');
     emit(current.copyWith(autoTurnPage: event.enabled));
   }
 
@@ -160,6 +192,11 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
           ? current.activeWordIndex
           : wordIndexAt(page.allWords, page.endTimeMs);
 
+      AppLogger.info(
+        'reader',
+        'Auto page off: pausing at pageIndex=${current.pageIndex} '
+            'incomingPageIndex=${event.pageIndex}',
+      );
       emit(
         current.copyWith(
           status: ReaderStatus.paused,
@@ -184,6 +221,12 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
         current.activeWordIndex == nextWordIndex) {
       return;
     }
+    if (current.pageIndex != nextPageIndex) {
+      AppLogger.info(
+        'reader',
+        'Timeline page change ${current.pageIndex} -> $nextPageIndex',
+      );
+    }
     emit(
       current.copyWith(
         pageIndex: nextPageIndex,
@@ -200,6 +243,7 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
     if (current is! StoryReaderReady) return;
     if (!current.isSpeaking) return;
 
+    AppLogger.info('reader', 'Story completed storyId=${current.story.id}');
     emit(
       StoryReaderCompleted(story: current.story, playback: current.playback),
     );
@@ -212,6 +256,7 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
     final current = state;
     if (current is! StoryReaderReady) return;
 
+    AppLogger.info('reader', 'Skip to completed storyId=${current.story.id}');
     await _audio.stop();
     emit(
       StoryReaderCompleted(story: current.story, playback: current.playback),
@@ -225,6 +270,7 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
     final current = state;
     if (current is! StoryReaderCompleted) return;
 
+    AppLogger.info('reader', 'Listen again storyId=${current.story.id}');
     final ready = StoryReaderReady(
       story: current.story,
       playback: current.playback,
@@ -242,6 +288,11 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
     StoryReaderReady current,
   ) async {
     try {
+      AppLogger.info(
+        'reader',
+        'Starting playback storyId=${current.story.id} '
+            'pages=${current.playback.pages.length}',
+      );
       emit(
         current.copyWith(
           status: ReaderStatus.speaking,
@@ -250,13 +301,20 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
         ),
       );
       await _audio.play(current.playback);
-    } catch (error) {
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        'reader',
+        'Failed to start playback storyId=${current.story.id}',
+        error: error,
+        stackTrace: stackTrace,
+      );
       emit(StoryReaderFailure(error.toString()));
     }
   }
 
   @override
   Future<void> close() async {
+    AppLogger.debug('reader', 'Closing StoryReaderBloc');
     await _audioSub?.cancel();
     await _audio.dispose();
     return super.close();

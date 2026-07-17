@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 
+import 'package:storytelling/core/logging/app_logger.dart';
+
 import '../dto/story_dto.dart';
 
 /// REST client for story endpoints.
@@ -9,7 +11,9 @@ class StoryApiService {
   final Dio _dio;
 
   Future<List<StoryDetailDto>> fetchStories() async {
+    AppLogger.info('api.stories', 'GET /stories');
     final response = await _dio.get<dynamic>('/stories');
+    AppLogger.info('api.stories', 'GET /stories status=${response.statusCode}');
     final payload = response.data;
 
     final list = switch (payload) {
@@ -17,8 +21,8 @@ class StoryApiService {
       final Map<String, dynamic> map when map['data'] is List =>
         map['data'] as List,
       _ => throw const FormatException(
-          'Expected a JSON array (or {data: []}) for /stories',
-        ),
+        'Expected a JSON array (or {data: []}) for /stories',
+      ),
     };
 
     return list
@@ -27,7 +31,12 @@ class StoryApiService {
   }
 
   Future<StoryDetailDto> fetchStoryById(int id) async {
+    AppLogger.info('api.stories', 'GET /stories/$id');
     final response = await _dio.get<dynamic>('/stories/$id');
+    AppLogger.info(
+      'api.stories',
+      'GET /stories/$id status=${response.statusCode}',
+    );
     final data = response.data;
     if (data is! Map<String, dynamic>) {
       throw const FormatException(

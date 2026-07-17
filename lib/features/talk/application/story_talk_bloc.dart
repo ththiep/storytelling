@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:storytelling/core/logging/app_logger.dart';
 import 'package:storytelling/core/recording/story_voice_recording_service.dart';
 import 'package:storytelling/shared/models/story.dart';
 import 'story_talk_event.dart';
@@ -28,6 +29,10 @@ class StoryTalkBloc extends Bloc<StoryTalkEvent, StoryTalkState> {
     StoryTalkStarted event,
     Emitter<StoryTalkState> emit,
   ) async {
+    AppLogger.info(
+      'talk',
+      'Starting talk storyId=${event.story.id} pages=${event.story.pages.length}',
+    );
     final initial = StoryTalkState.initial(event.story);
     emit(initial);
     await _loadRecordingForPage(emit, initial);
@@ -41,6 +46,12 @@ class StoryTalkBloc extends Bloc<StoryTalkEvent, StoryTalkState> {
     if (page == null || state.isBusy) return;
 
     final wasRecording = state.isRecording;
+    AppLogger.info(
+      'talk',
+      wasRecording
+          ? 'Stopping recording storyId=${state.story.id} page=${page.pageNumber}'
+          : 'Starting recording storyId=${state.story.id} page=${page.pageNumber}',
+    );
     emit(state.copyWith(status: TalkStatus.busy, clearNotice: true));
     try {
       if (wasRecording) {
@@ -50,6 +61,13 @@ class StoryTalkBloc extends Bloc<StoryTalkEvent, StoryTalkState> {
         );
         final practiced = {...state.practicedPageIndexes};
         if (file != null) practiced.add(state.pageIndex);
+        if (file == null) {
+          AppLogger.warning(
+            'talk',
+            'Recording stopped without usable file '
+                'storyId=${state.story.id} page=${page.pageNumber}',
+          );
+        }
         emit(
           state.copyWith(
             status: TalkStatus.ready,
@@ -71,7 +89,14 @@ class StoryTalkBloc extends Bloc<StoryTalkEvent, StoryTalkState> {
           ),
         );
       }
-    } catch (_) {
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        'talk',
+        'Recording toggle failed storyId=${state.story.id} '
+            'page=${page.pageNumber}',
+        error: error,
+        stackTrace: stackTrace,
+      );
       emit(
         state.copyWith(
           status: TalkStatus.ready,
@@ -89,6 +114,10 @@ class StoryTalkBloc extends Bloc<StoryTalkEvent, StoryTalkState> {
     if (page == null || state.isBusy || state.isRecording) return;
     if (!state.hasRecording) return;
 
+    AppLogger.info(
+      'talk',
+      'Playback pressed storyId=${state.story.id} page=${page.pageNumber}',
+    );
     emit(state.copyWith(status: TalkStatus.busy, clearNotice: true));
     try {
       await recordingService.playPageRecording(
@@ -96,7 +125,13 @@ class StoryTalkBloc extends Bloc<StoryTalkEvent, StoryTalkState> {
         pageNumber: page.pageNumber,
       );
       emit(state.copyWith(status: TalkStatus.ready, clearNotice: true));
-    } catch (_) {
+    } catch (error, stackTrace) {
+      AppLogger.error(
+        'talk',
+        'Playback failed storyId=${state.story.id} page=${page.pageNumber}',
+        error: error,
+        stackTrace: stackTrace,
+      );
       emit(
         state.copyWith(
           status: TalkStatus.ready,
@@ -113,6 +148,10 @@ class StoryTalkBloc extends Bloc<StoryTalkEvent, StoryTalkState> {
     if (event.pageIndex < 0 || event.pageIndex >= state.pages.length) return;
     if (event.pageIndex == state.pageIndex) return;
 
+    AppLogger.info(
+      'talk',
+      'Page change ${state.pageIndex} -> ${event.pageIndex}',
+    );
     await recordingService.cancelRecording();
     await recordingService.stopPlayback();
     final next = state.copyWith(
@@ -131,6 +170,7 @@ class StoryTalkBloc extends Bloc<StoryTalkEvent, StoryTalkState> {
   ) async {
     final page = current.currentPage;
     if (page == null) {
+      AppLogger.debug('talk', 'No pages available for talk state');
       emit(current.copyWith(status: TalkStatus.ready, clearNotice: true));
       return;
     }
@@ -142,6 +182,11 @@ class StoryTalkBloc extends Bloc<StoryTalkEvent, StoryTalkState> {
       );
       final practiced = {...current.practicedPageIndexes};
       if (file != null) practiced.add(current.pageIndex);
+      AppLogger.debug(
+        'talk',
+        'Loaded recording state storyId=${current.story.id} '
+            'page=${page.pageNumber} hasRecording=${file != null}',
+      );
       emit(
         current.copyWith(
           status: TalkStatus.ready,
@@ -150,13 +195,21 @@ class StoryTalkBloc extends Bloc<StoryTalkEvent, StoryTalkState> {
           clearNotice: true,
         ),
       );
-    } catch (_) {
+    } catch (error, stackTrace) {
+      AppLogger.warning(
+        'talk',
+        'Failed to load recording state storyId=${current.story.id} '
+            'page=${page.pageNumber}',
+        error: error,
+        stackTrace: stackTrace,
+      );
       emit(current.copyWith(status: TalkStatus.ready, clearNotice: true));
     }
   }
 
   @override
   Future<void> close() async {
+    AppLogger.debug('talk', 'Closing StoryTalkBloc');
     await recordingService.dispose();
     return super.close();
   }

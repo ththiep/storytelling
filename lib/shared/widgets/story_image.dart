@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:storytelling/app/theme/app_colors.dart';
+import 'package:storytelling/core/logging/app_logger.dart';
 
 class StoryImage extends StatelessWidget {
   const StoryImage({
@@ -31,7 +32,15 @@ class StoryImage extends StatelessWidget {
         width: width,
         height: height,
         fit: fit,
-        errorBuilder: (_, _, _) => _fallback(width: width, height: height),
+        errorBuilder: (_, error, stackTrace) {
+          AppLogger.warning(
+            'image',
+            'Failed to load network image url=$imageUrl',
+            error: error,
+            stackTrace: stackTrace,
+          );
+          return _fallback(width: width, height: height);
+        },
       );
     } else if (isAsset) {
       child = Image.asset(
@@ -39,9 +48,18 @@ class StoryImage extends StatelessWidget {
         width: width,
         height: height,
         fit: fit,
-        errorBuilder: (_, _, _) => _fallback(width: width, height: height),
+        errorBuilder: (_, error, stackTrace) {
+          AppLogger.warning(
+            'image',
+            'Failed to load asset image path=$imageUrl',
+            error: error,
+            stackTrace: stackTrace,
+          );
+          return _fallback(width: width, height: height);
+        },
       );
     } else {
+      AppLogger.warning('image', 'Unsupported image source=$imageUrl');
       child = _fallback(width: width, height: height);
     }
 
@@ -56,11 +74,7 @@ class StoryImage extends StatelessWidget {
       height: height,
       color: AppColors.imagePlaceholder,
       alignment: Alignment.center,
-      child: Icon(
-        Icons.image_rounded,
-        color: AppColors.orange700,
-        size: 32,
-      ),
+      child: Icon(Icons.image_rounded, color: AppColors.orange700, size: 32),
     );
   }
 }

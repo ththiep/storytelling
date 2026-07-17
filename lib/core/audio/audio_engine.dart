@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:just_audio/just_audio.dart';
 
+import '../logging/app_logger.dart';
 import '../utils/word_timing_utils.dart';
 import 'narration_events.dart';
 
@@ -26,11 +27,18 @@ class AudioEngine {
   Stream<NarrationEvent> get events => _controller.stream;
 
   Future<void> prepare() async {
+    AppLogger.debug('audio', 'Preparing audio engine');
     await _player.setVolume(1);
   }
 
   Future<void> play(StoryPlayback playback) async {
     final session = ++_sessionId;
+    AppLogger.info(
+      'audio',
+      'Starting playback session=$session '
+          'source=${playback.isNetworkAudio ? 'network' : 'asset'} '
+          'durationMs=${playback.durationMs} pages=${playback.pages.length}',
+    );
     _playback = playback;
     _lastPageIndex = -1;
     _lastWordIndex = -1;
@@ -46,7 +54,10 @@ class AudioEngine {
     } else {
       await _player.setAsset(playback.audioSource);
     }
-    if (session != _sessionId) return;
+    if (session != _sessionId) {
+      AppLogger.debug('audio', 'Ignoring stale play session=$session');
+      return;
+    }
 
     _positionTimer = Timer.periodic(const Duration(milliseconds: 50), (_) {
       if (!_speaking || session != _sessionId) return;
@@ -56,6 +67,7 @@ class AudioEngine {
     _stateSub = _player.playerStateStream.listen((state) {
       if (session != _sessionId) return;
       if (state.processingState == ProcessingState.completed) {
+        AppLogger.info('audio', 'Player completed session=$session');
         _emitCompleted();
       }
     });
@@ -80,12 +92,9 @@ class AudioEngine {
     if (!allowBackward &&
         _lastPositionMs >= 0 &&
         positionMs < _lastPositionMs - 250) {
-      // just_audio can briefly report an older playback event after loading or
-      // buffering. Dropping it keeps karaoke from jumping back mid-sentence.
-      // ignore: avoid_print
-      print(
-        '[karaoke] ignored stale positionMs=$positionMs '
-        'lastPositionMs=$_lastPositionMs',
+      AppLogger.debug(
+        'karaoke',
+        'Ignored stale positionMs=$positionMs lastPositionMs=$_lastPositionMs',
       );
       return;
     }
@@ -101,11 +110,10 @@ class AudioEngine {
         page == null || wordIndex < 0 || wordIndex >= page.allWords.length
         ? '-'
         : page.allWords[wordIndex].word;
-    // Keep this log while tuning karaoke sync. It only fires when page/word changes.
-    // ignore: avoid_print
-    print(
-      '[karaoke] positionMs=$positionMs pageIndex=$pageIndex '
-      'wordIndex=$wordIndex word="$word"',
+    AppLogger.debug(
+      'karaoke',
+      'positionMs=$positionMs pageIndex=$pageIndex '
+          'wordIndex=$wordIndex word="$word"',
     );
     _lastPageIndex = pageIndex;
     _lastWordIndex = wordIndex;
@@ -121,12 +129,14 @@ class AudioEngine {
 
   Future<void> pause() async {
     if (!_speaking) return;
+    AppLogger.info('audio', 'Pausing playback at ${_player.position}');
     _speaking = false;
     await _player.pause();
     _controller.add(const NarrationPaused());
   }
 
   Future<void> resume() async {
+    AppLogger.info('audio', 'Resuming playback at ${_player.position}');
     _speaking = true;
     await _player.play();
   }
@@ -136,12 +146,14 @@ class AudioEngine {
     if (playback == null) return;
 
     final clampedPosition = positionMs.clamp(0, playback.durationMs);
+    AppLogger.info('audio', 'Seeking to ${clampedPosition}ms');
     await _player.seek(Duration(milliseconds: clampedPosition));
     _lastPositionMs = clampedPosition;
     _emitProgress(clampedPosition, allowBackward: true);
   }
 
   Future<void> stop() async {
+    AppLogger.info('audio', 'Stopping playback session=$_sessionId');
     _sessionId += 1;
     _speaking = false;
     _lastPageIndex = -1;
@@ -163,6 +175,7 @@ class AudioEngine {
 
   void _emitCompleted() {
     if (!_speaking) return;
+    AppLogger.info('audio', 'Emitting playback completed');
     _speaking = false;
     _completionFallback?.cancel();
     _completionFallback = null;
@@ -170,6 +183,7 @@ class AudioEngine {
   }
 
   Future<void> dispose() async {
+    AppLogger.debug('audio', 'Disposing audio engine');
     await stop();
     await _controller.close();
     await _player.dispose();

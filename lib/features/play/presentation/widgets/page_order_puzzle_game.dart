@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:storytelling/app/theme/app_colors.dart';
 import 'package:storytelling/app/theme/theme_manager.dart';
+import 'package:storytelling/core/logging/app_logger.dart';
 import 'package:storytelling/l10n/app_localizations.dart';
 import 'package:storytelling/shared/widgets/story_image.dart';
 
@@ -42,6 +43,7 @@ class _PageOrderPuzzleGameState extends State<PageOrderPuzzleGame> {
 
   void _resetPuzzle() {
     final count = widget.pieces.length;
+    AppLogger.info('play.puzzle', 'Reset puzzle pieces=$count');
     _slotPieceIndices = List<int?>.filled(count, null);
     _poolPieceIndices = List<int>.generate(count, (index) => index);
     _poolPieceIndices.shuffle(Random());
@@ -49,6 +51,7 @@ class _PageOrderPuzzleGameState extends State<PageOrderPuzzleGame> {
     _isSolved = false;
 
     if (count == 1) {
+      AppLogger.info('play.puzzle', 'Single-piece puzzle auto-solved');
       _slotPieceIndices[0] = _poolPieceIndices.removeAt(0);
       _isSolved = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -120,6 +123,10 @@ class _PageOrderPuzzleGameState extends State<PageOrderPuzzleGame> {
 
     if (!solved) return;
 
+    AppLogger.info(
+      'play.puzzle',
+      'Puzzle solved pieces=${widget.pieces.length}',
+    );
     _isSolved = true;
     widget.onCompleted?.call();
   }

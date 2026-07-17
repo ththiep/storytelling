@@ -4,6 +4,7 @@ import 'package:storytelling/app/theme/app_assets.dart';
 import 'package:storytelling/app/theme/app_colors.dart';
 import 'package:storytelling/app/theme/app_typography.dart';
 import 'package:storytelling/app/theme/theme_manager.dart';
+import 'package:storytelling/core/logging/app_logger.dart';
 import 'package:storytelling/features/play/presentation/widgets/page_order_puzzle_game.dart';
 import 'package:storytelling/l10n/app_localizations.dart';
 import 'package:storytelling/shared/models/story.dart';
@@ -30,6 +31,10 @@ class _StoryGameScreenState extends State<StoryGameScreen> {
 
   void _onPuzzleCompleted() {
     if (_showCelebration) return;
+    AppLogger.info(
+      'play',
+      'Puzzle completed story="${widget.storyTitle}" pages=${widget.pages.length}',
+    );
     setState(() => _showCelebration = true);
     Future<void>.delayed(const Duration(seconds: 2), () {
       if (!mounted) return;

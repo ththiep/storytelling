@@ -1,9 +1,14 @@
 import 'package:dio/dio.dart';
 
 import '../config/api_config.dart';
+import '../logging/app_logger.dart';
 import 'api_exception.dart';
 
 Dio createDioClient([ApiConfig config = ApiConfig.instance]) {
+  AppLogger.info(
+    'network',
+    'Creating Dio client baseUrl=${config.baseUrl} logging=${config.enableLogging}',
+  );
   final dio = Dio(
     BaseOptions(
       baseUrl: config.baseUrl,
@@ -17,17 +22,19 @@ Dio createDioClient([ApiConfig config = ApiConfig.instance]) {
   );
 
   if (config.enableLogging) {
-    dio.interceptors.add(
-      LogInterceptor(
-        requestBody: true,
-        responseBody: true,
-      ),
-    );
+    dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
   }
 
   dio.interceptors.add(
     InterceptorsWrapper(
       onError: (error, handler) {
+        AppLogger.warning(
+          'network',
+          'Network error ${error.requestOptions.method} '
+              '${error.requestOptions.path} type=${error.type} '
+              'status=${error.response?.statusCode}',
+          error: error,
+        );
         handler.reject(_mapDioError(error));
       },
     ),
@@ -61,11 +68,7 @@ DioException _mapDioError(DioException error) {
     requestOptions: error.requestOptions,
     response: error.response,
     type: error.type,
-    error: ApiException(
-      message: message,
-      statusCode: statusCode,
-      data: data,
-    ),
+    error: ApiException(message: message, statusCode: statusCode, data: data),
     message: message,
   );
 }

@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 
 import '../../core/audio/audio_engine.dart';
 import '../../core/config/api_config.dart';
+import '../../core/logging/app_logger.dart';
 import '../../core/network/dio_client.dart';
 import '../../core/permissions/app_permission_service.dart';
 import '../../core/recording/story_voice_recording_service.dart';
@@ -25,6 +26,11 @@ Future<void> configureDependencies({
   ApiConfig? apiConfig,
 }) async {
   final config = apiConfig ?? ApiConfig.instance;
+  AppLogger.info(
+    'di',
+    'Configuring dependencies useRemoteApi=$useRemoteApi '
+        'baseUrl=${config.baseUrl}',
+  );
 
   final repository =
       storyRepository ??
@@ -57,6 +63,7 @@ Future<void> configureDependencies({
       () =>
           StoryTalkBloc(recordingService: getIt<StoryVoiceRecordingService>()),
     );
+  AppLogger.info('di', 'Dependencies configured');
 }
 
 Future<void> resetDependencies() => getIt.reset();
