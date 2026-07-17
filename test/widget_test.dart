@@ -19,7 +19,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.byType(StrokeText), findsOneWidget);
-    expect(find.text('Too Big! Too Small!'), findsOneWidget);
+    expect(find.text('Thánh Gióng'), findsOneWidget);
   });
 
   testWidgets('Selecting a story opens its three-mode hub', (tester) async {
@@ -27,7 +27,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    await tester.tap(find.text('Too Big! Too Small!'));
+    final storyTitle = find.text('Thánh Gióng');
+    await tester.ensureVisible(storyTitle);
+    await tester.pumpAndSettle();
+    await tester.tap(storyTitle);
     await tester.pumpAndSettle();
 
     expect(find.text('Con muốn làm gì?'), findsOneWidget);

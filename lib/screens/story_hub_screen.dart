@@ -134,7 +134,7 @@ class _HubHeader extends StatelessWidget {
       child: Row(
         children: [
           StoryBackButton(onPressed: () => Navigator.of(context).pop()),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               title,
@@ -168,7 +168,7 @@ class _StorySummary extends StatelessWidget {
             StoryImage(
               imageUrl: story.imageUrl,
               width: 96,
-              height: 120,
+              height: 130,
               borderRadius: theme.radiusMedium,
             ),
             const SizedBox(width: 14),
@@ -189,11 +189,6 @@ class _StorySummary extends StatelessWidget {
                     spacing: 8,
                     runSpacing: 8,
                     children: [
-                      _SummaryBadge(
-                        icon: Icons.star_rounded,
-                        text: 'Cấp ${story.level}',
-                        color: theme.brandPrimary,
-                      ),
                       _SummaryBadge(
                         iconAsset: AppAssets.storyTime,
                         text: '${story.durationMinutes} phút',

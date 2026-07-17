@@ -26,7 +26,7 @@ void main() {
         isA<StoryListLoaded>().having(
           (state) => state.stories.length,
           'stories.length',
-          1,
+          6,
         ),
       ],
     );
