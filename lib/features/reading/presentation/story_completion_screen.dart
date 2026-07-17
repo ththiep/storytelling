@@ -9,6 +9,7 @@ import 'package:storytelling/features/play/presentation/story_game_screen.dart';
 import 'package:storytelling/features/reading/application/story_reader_bloc.dart';
 import 'package:storytelling/features/reading/application/story_reader_event.dart';
 import 'package:storytelling/features/reading/application/story_reader_state.dart';
+import 'package:storytelling/features/talk/presentation/story_talk_screen.dart';
 import 'package:storytelling/l10n/app_localizations.dart';
 import 'package:storytelling/shared/widgets/story_back_button.dart';
 import 'package:storytelling/shared/widgets/story_image.dart';
@@ -45,81 +46,99 @@ class StoryCompletionView extends StatelessWidget {
                   decoration: theme.kidPanelInnerDecoration(standalone: true),
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
-                    child: Column(
-                      children: [
-                        const Spacer(),
-                        SizedBox(
-                          width: 180,
-                          height: 210,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            clipBehavior: Clip.none,
-                            children: [
-                              StoryImage(
-                                imageUrl: state.story.imageUrl,
-                                width: 180,
-                                height: 210,
-                                borderRadius: theme.radiusMedium,
-                              ),
-                              Positioned(
-                                top: -20,
-                                child: Image.asset(
-                                  AppAssets.congratulation,
-                                  width: 200,
-                                  height: 200,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            width: 180,
+                            height: 210,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              clipBehavior: Clip.none,
+                              children: [
+                                StoryImage(
+                                  imageUrl: state.story.imageUrl,
+                                  width: 180,
+                                  height: 210,
+                                  borderRadius: theme.radiusMedium,
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        StrokeText(
-                          text: l10n.completionTitle,
-                          textAlign: TextAlign.center,
-                          strokeColor: AppColors.strokeTitle,
-                          strokeWidth: 4,
-                          shadowOffset: const Offset(0, 3),
-                          shadowColor: AppColors.strokeTitleShadow,
-                          textStyle: AppTypography.celebrationTitle(
-                            color: AppColors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          l10n.completionMessage(state.story.title),
-                          textAlign: TextAlign.center,
-                          style: theme.bodyLarge,
-                        ),
-                        const Spacer(),
-                        _CompletionOptionCard(
-                          iconAsset: AppAssets.playButton,
-                          iconColor: theme.readingColor,
-                          iconBackground: theme.readingBackground,
-                          title: l10n.listenAgainQuestion,
-                          subtitle: l10n.listenAgainAction,
-                          onTap: () {
-                            bloc.add(const StoryReaderListenAgainPressed());
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        _CompletionOptionCard(
-                          iconAsset: AppAssets.storyBook,
-                          iconColor: theme.playColor,
-                          iconBackground: theme.playBackground,
-                          title: l10n.playGameQuestion,
-                          subtitle: l10n.playGameAction,
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) => StoryGameScreen(
-                                  storyTitle: state.story.title,
-                                  pages: state.story.pages,
+                                Positioned(
+                                  top: -20,
+                                  child: Image.asset(
+                                    AppAssets.congratulation,
+                                    width: 200,
+                                    height: 200,
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          StrokeText(
+                            text: l10n.completionTitle,
+                            textAlign: TextAlign.center,
+                            strokeColor: AppColors.strokeTitle,
+                            strokeWidth: 4,
+                            shadowOffset: const Offset(0, 3),
+                            shadowColor: AppColors.strokeTitleShadow,
+                            textStyle: AppTypography.celebrationTitle(
+                              color: AppColors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            l10n.completionMessage(state.story.title),
+                            textAlign: TextAlign.center,
+                            style: theme.bodyLarge,
+                          ),
+                          const SizedBox(height: 20),
+                          _CompletionOptionCard(
+                            iconAsset: AppAssets.playButton,
+                            iconColor: theme.readingColor,
+                            iconBackground: theme.readingBackground,
+                            title: l10n.listenAgainQuestion,
+                            subtitle: l10n.listenAgainAction,
+                            onTap: () {
+                              bloc.add(const StoryReaderListenAgainPressed());
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          _CompletionOptionCard(
+                            iconAsset: AppAssets.storyBook,
+                            iconColor: theme.playColor,
+                            iconBackground: theme.playBackground,
+                            title: l10n.playGameQuestion,
+                            subtitle: l10n.playGameAction,
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => StoryGameScreen(
+                                    storyTitle: state.story.title,
+                                    pages: state.story.pages,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          _CompletionOptionCard(
+                            icon: Icons.mic_rounded,
+                            iconColor: theme.speakingColor,
+                            iconBackground: theme.speakingBackground,
+                            title: l10n.speakTitle,
+                            subtitle: l10n.speakSubtitle,
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) =>
+                                      StoryTalkScreen(story: state.story),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

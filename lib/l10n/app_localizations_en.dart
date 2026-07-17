@@ -47,6 +47,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get speakSubtitle => 'Read out loud';
 
   @override
+  String get speakAction => 'Talk';
+
+  @override
   String get comingSoon => 'Soon';
 
   @override
@@ -139,4 +142,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String pageLabel(int number) {
     return 'Page $number';
   }
+
+  @override
+  String talkPageCount(int current, int total) {
+    return 'Page $current/$total';
+  }
+
+  @override
+  String get talkEmpty => 'No words to say yet.';
+
+  @override
+  String get talkReadyStatus => 'Ready?';
+
+  @override
+  String get talkListeningStatus => 'I am listening...';
+
+  @override
+  String get talkDoneStatus => 'Nice reading!';
+
+  @override
+  String get talkStart => 'Start';
+
+  @override
+  String get talkStop => 'Done';
+
+  @override
+  String get talkNext => 'Next';
+
+  @override
+  String get talkPrevious => 'Back';
+
+  @override
+  String get talkCompleteTitle => 'Great voice!';
+
+  @override
+  String get talkCompleteMessage => 'You talked through every page.';
 }

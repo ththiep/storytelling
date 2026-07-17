@@ -38,6 +38,27 @@ void main() {
     expect(find.text('Đọc truyện'), findsOneWidget);
     expect(find.text('Chơi'), findsOneWidget);
     expect(find.text('Luyện nói'), findsOneWidget);
-    expect(find.text('Sắp có'), findsOneWidget);
+    expect(find.text('Nói ngay'), findsOneWidget);
+  });
+
+  testWidgets('Selecting talk opens the talk practice screen', (tester) async {
+    await tester.pumpWidget(const StorytellingApp(locale: Locale('vi')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    final storyTitle = find.text('Thánh Gióng');
+    await tester.ensureVisible(storyTitle);
+    await tester.pumpAndSettle();
+    await tester.tap(storyTitle);
+    await tester.pumpAndSettle();
+
+    final talkAction = find.text('Nói ngay');
+    await tester.ensureVisible(talkAction);
+    await tester.pumpAndSettle();
+    await tester.tap(talkAction);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Sẵn sàng chưa?'), findsOneWidget);
+    expect(find.text('Bắt đầu'), findsOneWidget);
   });
 }

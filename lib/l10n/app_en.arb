@@ -19,6 +19,7 @@
   "playAction": "Play",
   "speakTitle": "Talk",
   "speakSubtitle": "Read out loud",
+  "speakAction": "Talk",
   "comingSoon": "Soon",
   "minutesCount": "{count} min",
   "@minutesCount": {
@@ -90,5 +91,26 @@
         "type": "int"
       }
     }
-  }
+  },
+  "talkPageCount": "Page {current}/{total}",
+  "@talkPageCount": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "talkEmpty": "No words to say yet.",
+  "talkReadyStatus": "Ready?",
+  "talkListeningStatus": "I am listening...",
+  "talkDoneStatus": "Nice reading!",
+  "talkStart": "Start",
+  "talkStop": "Done",
+  "talkNext": "Next",
+  "talkPrevious": "Back",
+  "talkCompleteTitle": "Great voice!",
+  "talkCompleteMessage": "You talked through every page."
 }

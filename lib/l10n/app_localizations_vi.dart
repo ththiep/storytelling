@@ -47,6 +47,9 @@ class AppLocalizationsVi extends AppLocalizations {
   String get speakSubtitle => 'Đọc to cho cả nhà nghe';
 
   @override
+  String get speakAction => 'Nói ngay';
+
+  @override
   String get comingSoon => 'Sắp có';
 
   @override
@@ -139,4 +142,39 @@ class AppLocalizationsVi extends AppLocalizations {
   String pageLabel(int number) {
     return 'Trang $number';
   }
+
+  @override
+  String talkPageCount(int current, int total) {
+    return 'Trang $current/$total';
+  }
+
+  @override
+  String get talkEmpty => 'Truyện này chưa có chữ để luyện nói.';
+
+  @override
+  String get talkReadyStatus => 'Sẵn sàng chưa?';
+
+  @override
+  String get talkListeningStatus => 'Cô đang nghe...';
+
+  @override
+  String get talkDoneStatus => 'Con đọc hay lắm!';
+
+  @override
+  String get talkStart => 'Bắt đầu';
+
+  @override
+  String get talkStop => 'Xong rồi';
+
+  @override
+  String get talkNext => 'Tiếp';
+
+  @override
+  String get talkPrevious => 'Lùi lại';
+
+  @override
+  String get talkCompleteTitle => 'Giọng hay quá!';
+
+  @override
+  String get talkCompleteMessage => 'Con đã đọc hết các trang rồi.';
 }

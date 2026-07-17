@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import '../../core/audio/audio_engine.dart';
 import '../../core/config/api_config.dart';
 import '../../core/network/dio_client.dart';
+import '../../core/permissions/app_permission_service.dart';
 import '../../features/catalog/data/api_story_repository.dart';
 import '../../features/catalog/data/remote/story_api_service.dart';
 import '../../features/catalog/data/story_repository.dart';
@@ -23,7 +24,8 @@ Future<void> configureDependencies({
 }) async {
   final config = apiConfig ?? ApiConfig.instance;
 
-  final repository = storyRepository ??
+  final repository =
+      storyRepository ??
       (useRemoteApi
           ? ApiStoryRepository(getIt<StoryApiService>())
           : MockStoryRepository());
@@ -34,6 +36,7 @@ Future<void> configureDependencies({
     ..registerLazySingleton<StoryApiService>(
       () => StoryApiService(getIt<Dio>()),
     )
+    ..registerLazySingleton<AppPermissionService>(AppPermissionService.new)
     ..registerLazySingleton<StoryRepository>(() => repository)
     ..registerFactory<AudioEngine>(AudioEngine.new)
     ..registerFactory<StoryListBloc>(

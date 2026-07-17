@@ -170,6 +170,12 @@ abstract class AppLocalizations {
   /// **'Read out loud'**
   String get speakSubtitle;
 
+  /// No description provided for @speakAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Talk'**
+  String get speakAction;
+
   /// No description provided for @comingSoon.
   ///
   /// In en, this message translates to:
@@ -331,6 +337,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Page {number}'**
   String pageLabel(int number);
+
+  /// No description provided for @talkPageCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {current}/{total}'**
+  String talkPageCount(int current, int total);
+
+  /// No description provided for @talkEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No words to say yet.'**
+  String get talkEmpty;
+
+  /// No description provided for @talkReadyStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready?'**
+  String get talkReadyStatus;
+
+  /// No description provided for @talkListeningStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'I am listening...'**
+  String get talkListeningStatus;
+
+  /// No description provided for @talkDoneStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Nice reading!'**
+  String get talkDoneStatus;
+
+  /// No description provided for @talkStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get talkStart;
+
+  /// No description provided for @talkStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get talkStop;
+
+  /// No description provided for @talkNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get talkNext;
+
+  /// No description provided for @talkPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get talkPrevious;
+
+  /// No description provided for @talkCompleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Great voice!'**
+  String get talkCompleteTitle;
+
+  /// No description provided for @talkCompleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You talked through every page.'**
+  String get talkCompleteMessage;
 }
 
 class _AppLocalizationsDelegate

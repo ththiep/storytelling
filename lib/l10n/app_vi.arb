@@ -19,6 +19,7 @@
   "playAction": "Chơi ngay",
   "speakTitle": "Luyện nói",
   "speakSubtitle": "Đọc to cho cả nhà nghe",
+  "speakAction": "Nói ngay",
   "comingSoon": "Sắp có",
   "minutesCount": "{count} phút",
   "@minutesCount": {
@@ -90,5 +91,26 @@
         "type": "int"
       }
     }
-  }
+  },
+  "talkPageCount": "Trang {current}/{total}",
+  "@talkPageCount": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "talkEmpty": "Truyện này chưa có chữ để luyện nói.",
+  "talkReadyStatus": "Sẵn sàng chưa?",
+  "talkListeningStatus": "Cô đang nghe...",
+  "talkDoneStatus": "Con đọc hay lắm!",
+  "talkStart": "Bắt đầu",
+  "talkStop": "Xong rồi",
+  "talkNext": "Tiếp",
+  "talkPrevious": "Lùi lại",
+  "talkCompleteTitle": "Giọng hay quá!",
+  "talkCompleteMessage": "Con đã đọc hết các trang rồi."
 }

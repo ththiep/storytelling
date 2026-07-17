@@ -5,6 +5,7 @@ import 'package:storytelling/app/theme/app_colors.dart';
 import 'package:storytelling/app/theme/theme_manager.dart';
 import 'package:storytelling/features/play/presentation/story_game_screen.dart';
 import 'package:storytelling/features/reading/presentation/story_reader_screen.dart';
+import 'package:storytelling/features/talk/presentation/story_talk_screen.dart';
 import 'package:storytelling/l10n/app_localizations.dart';
 import 'package:storytelling/shared/models/story.dart';
 import 'package:storytelling/shared/widgets/story_back_button.dart';
@@ -99,8 +100,15 @@ class StoryHubScreen extends StatelessWidget {
                                 backgroundColor: theme.speakingBackground,
                                 title: l10n.speakTitle,
                                 subtitle: l10n.speakSubtitle,
-                                actionLabel: l10n.comingSoon,
-                                onTap: null,
+                                actionLabel: l10n.speakAction,
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute<void>(
+                                      builder: (_) =>
+                                          StoryTalkScreen(story: story),
+                                    ),
+                                  );
+                                },
                               ),
                             ],
                           ),

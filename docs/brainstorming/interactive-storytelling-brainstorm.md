@@ -26,12 +26,12 @@
 |---|---|
 | Story list | Mock/API-backed list with cover, progress |
 | Reading | Audio + karaoke word timing, swipe pages, auto-turn |
-| After Reading | Completion UI → listen again / play game |
+| After Reading | Completion UI → listen again / play game / talk |
 | Play | Page-order puzzle (tap + drag), works for few pages |
-| Speaking | Not started |
-| Story hub | Not started (modes not first-class) |
+| Talk | v0 practice screen in progress |
+| Story hub | First-class Read / Play / Talk modes |
 
-**Insight:** We already have the spine of **Reading → celebrate → Play**. The leap is making **3 modes** a product system, not three disconnected screens.
+**Insight:** We now have the spine of **Reading → celebrate → Play/Talk**. The next leap is making Talk real with parent-friendly recording, privacy choices, and gentle feedback.
 
 ---
 

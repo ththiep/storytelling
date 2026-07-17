@@ -1,7 +1,7 @@
 # Project Structure
 
 > Last updated: 2026-07-17  
-> Flutter app: interactive storytelling (Reading / Play / Speaking)  
+> Flutter app: interactive storytelling (Read / Play / Talk)  
 > Layout: **feature-first** (`app` / `core` / `shared` / `features`)
 
 ---
@@ -26,6 +26,8 @@ storytelling/
 │   ├── core/                             # Cross-cutting infrastructure
 │   │   ├── config/api_config.dart
 │   │   ├── network/                      # Dio, ApiException
+│   │   ├── permissions/
+│   │   │   └── app_permission_service.dart # microphone permission
 │   │   ├── audio/
 │   │   │   ├── audio_engine.dart         # just_audio + timeline
 │   │   │   └── narration_events.dart     # NarrationEvent types
@@ -104,12 +106,12 @@ storytelling/
 
 ```text
 ┌──────────────────────────────────────────────────────────┐
-│  features/*/presentation (+ application BLoCs)           │
-│  catalog → hub → reading | play | (speaking TBD)         │
+│  features/*/presentation (+ application BLoCs where needed) │
+│  catalog → hub → reading | play | talk                   │
 └────────────────────────────┬─────────────────────────────┘
                              │
 ┌────────────────────────────▼─────────────────────────────┐
-│  features/catalog/data  ·  core/audio  ·  app/theme      │
+│  features/catalog/data · core/audio/permissions · app/theme │
 └────────────────────────────┬─────────────────────────────┘
                              │
               ┌──────────────┴──────────────┐
@@ -123,7 +125,7 @@ storytelling/
 | Layer | Location | Responsibility |
 |---|---|---|
 | **App shell** | `lib/app/` | DI, theme, `MaterialApp` |
-| **Core** | `lib/core/` | Network, audio, timing utils |
+| **Core** | `lib/core/` | Network, audio, permissions, timing utils |
 | **Shared** | `lib/shared/` | Domain models + reusable widgets |
 | **Features** | `lib/features/<name>/` | Vertical slices: data / application / presentation |
 
@@ -142,7 +144,7 @@ HomeScreen (catalog)
             │                     · cover + congratulation GIF
             │                     · listen again / play
             ├── Play → StoryGameScreen → PageOrderPuzzleGame
-            └── Speaking → placeholder
+            └── Talk → StoryTalkScreen
 ```
 
 ---
@@ -181,6 +183,24 @@ HomeScreen (catalog)
 
 - `StoryGameScreen` + `PageOrderPuzzleGame` (tap + drag)
 
+### Talk
+
+- `StoryTalkScreen` — v0 speaking practice.
+- Shows one story page at a time with image + large read-aloud text.
+- Child taps the mic button to start/stop a practice turn.
+- v0 records practice progress in memory only.
+- Microphone permission is requested at app startup through `AppPermissionService`.
+- ASR, recording playback, and scoring are next slices.
+
+### Permissions
+
+- `AppPermissionService` wraps `permission_handler` so UI/features do not call permission APIs directly.
+- `main.dart` requests microphone permission after DI is configured and before `runApp`.
+- Android declares `android.permission.RECORD_AUDIO`.
+- iOS/macOS declare `NSMicrophoneUsageDescription`.
+- iOS `Podfile` enables `PERMISSION_MICROPHONE=1`.
+- macOS entitlements include `com.apple.security.device.audio-input`.
+
 ### Theme
 
 ```dart
@@ -197,6 +217,7 @@ Image.asset(AppAssets.playButton);
 | `story_dto_test.dart` | DTO parsing |
 | `word_timing_utils_test.dart` | Karaoke indexes |
 | `story_list_bloc_test.dart` | Catalog load (6 stories) |
+| `story_reader_bloc_test.dart` | Reader audio/page behavior |
 | `page_order_puzzle_game_test.dart` | Puzzle piece model |
 | `widget_test.dart` | Home + hub navigation |
 
@@ -216,7 +237,8 @@ flutter test
 | Completion celebration | ✅ | Cover + GIF overlay |
 | Play puzzle | ⚠️ | No multi-round chunking yet |
 | Per-story full packages | ⚠️ | Only `thanh-giong` complete |
-| Speaking | ❌ | Placeholder |
+| Microphone permission | ✅ | Requested on startup through `AppPermissionService` |
+| Talk | 🚧 | v0 practice screen + mic permission, no recorder/ASR/scoring yet |
 | Monetization | ❌ | Not started |
 
 ---
@@ -229,10 +251,11 @@ flutter test
 | Hub UI | `features/hub/presentation/` |
 | Reader / completion | `features/reading/` |
 | New mini-game | `features/play/presentation/widgets/` |
+| Talk / speaking practice | `features/talk/` |
 | Shared widget | `shared/widgets/` |
 | Domain model | `shared/models/` |
 | Theme / UI asset path | `app/theme/` + `assets/ui/` |
-| Audio / network | `core/` |
+| Audio / network / permissions | `core/` |
 | New story package | `assets/stories/<slug>/` (cover, `pages/`, audio) + mock/API |
 | Product requirements | `docs/spec/product-spec.md` |
 
@@ -241,7 +264,7 @@ flutter test
 ## 9. Suggested next steps
 
 1. Complete per-story packages (pages + timed text + audio) instead of reusing `thanh-giong`.
-2. Add `features/speaking/` when starting Speaking v0.
+2. Add real microphone capture and parent playback to Talk v1.
 3. Split large UI files (`page_order_puzzle_game.dart`, reader screen) into smaller presentation widgets as they grow.
 4. Mirror `test/` under feature paths when coverage expands.
 
