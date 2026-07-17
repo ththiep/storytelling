@@ -1,0 +1,94 @@
+{
+  "@@locale": "vi",
+  "appTitle": "Kể chuyện",
+  "homeTitle": "Góc kể chuyện",
+  "loadStoriesError": "Ôi, chưa tải được truyện: {message}",
+  "@loadStoriesError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "hubQuestion": "Con muốn làm gì?",
+  "readStoryTitle": "Đọc truyện",
+  "readStorySubtitle": "Nghe và đọc từng từ",
+  "readStoryAction": "Bắt đầu",
+  "playTitle": "Chơi",
+  "playSubtitle": "Xếp hình đúng thứ tự",
+  "playAction": "Chơi ngay",
+  "speakTitle": "Luyện nói",
+  "speakSubtitle": "Đọc to cho cả nhà nghe",
+  "comingSoon": "Sắp có",
+  "minutesCount": "{count} phút",
+  "@minutesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pagesCount": "{count} trang",
+  "@pagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "readerPageCount": "Trang {current}/{total}",
+  "@readerPageCount": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "readerError": "Ôi: {message}",
+  "@readerError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "readerFinishedStatus": "Con đọc xong rồi!",
+  "readerSpeakingStatus": "Đang kể...",
+  "readerPausedStatus": "Tạm dừng",
+  "readerIdleStatus": "Bấm để nghe",
+  "autoTurnPage": "Tự lật trang",
+  "finishReading": "Đọc xong",
+  "completionTitle": "Giỏi quá!",
+  "completionMessage": "Con đã nghe xong\n\"{title}\"",
+  "@completionMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "listenAgainQuestion": "Nghe lại nhé?",
+  "listenAgainAction": "Nghe từ đầu",
+  "playGameQuestion": "Chơi trò chơi nhé?",
+  "playGameAction": "Chơi cùng truyện",
+  "gameSubtitle": "Xếp hình theo trang",
+  "gameCompleteTitle": "Xong rồi!",
+  "gameCompleteMessage": "Con xếp đúng hình rồi!",
+  "puzzleNoPictures": "Truyện này chưa có hình để chơi.",
+  "puzzleSolved": "Hay quá! Con xếp đúng rồi.",
+  "puzzleInstructions": "Chạm chọn hình, rồi chạm vào ô trang.\nCon cũng có thể kéo hình.",
+  "puzzleSelected": "Đã chọn hình. Chạm vào ô trang nhé.",
+  "puzzlePiecesTitle": "Các hình",
+  "shuffleAgain": "Xáo lại",
+  "pageLabel": "Trang {number}",
+  "@pageLabel": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  }
+}

@@ -5,6 +5,7 @@ import 'package:storytelling/app/theme/app_colors.dart';
 import 'package:storytelling/app/theme/app_typography.dart';
 import 'package:storytelling/app/theme/theme_manager.dart';
 import 'package:storytelling/features/play/presentation/widgets/page_order_puzzle_game.dart';
+import 'package:storytelling/l10n/app_localizations.dart';
 import 'package:storytelling/shared/models/story.dart';
 import 'package:storytelling/shared/widgets/story_back_button.dart';
 import 'package:storytelling/shared/widgets/story_scaffold_background.dart';
@@ -55,6 +56,7 @@ class _StoryGameScreenState extends State<StoryGameScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = context.storyTheme;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       body: StoryScaffoldBackground(
@@ -83,17 +85,11 @@ class _StoryGameScreenState extends State<StoryGameScreen> {
                                 style: theme.sectionTitle,
                               ),
                               const SizedBox(height: 2),
-                              Text(
-                                'Ghép hình theo thứ tự trang',
-                                style: theme.bodySmall,
-                              ),
+                              Text(l10n.gameSubtitle, style: theme.bodySmall),
                             ],
                           ),
                         ),
-                        Icon(
-                          Icons.extension_rounded,
-                          color: theme.playColor,
-                        ),
+                        Icon(Icons.extension_rounded, color: theme.playColor),
                       ],
                     ),
                   ),
@@ -120,6 +116,7 @@ class _PuzzleCelebrationOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.storyTheme;
+    final l10n = AppLocalizations.of(context);
 
     return Positioned.fill(
       child: IgnorePointer(
@@ -145,7 +142,7 @@ class _PuzzleCelebrationOverlay extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     StrokeText(
-                      text: 'Hoàn thành!',
+                      text: l10n.gameCompleteTitle,
                       strokeColor: AppColors.strokeTitle,
                       strokeWidth: 3,
                       shadowOffset: const Offset(0, 2),
@@ -156,7 +153,7 @@ class _PuzzleCelebrationOverlay extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Con đã ghép đúng hình rồi!',
+                      l10n.gameCompleteMessage,
                       style: theme.bodyMedium.copyWith(
                         color: theme.textSecondary,
                       ),

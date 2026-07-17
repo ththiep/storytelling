@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   equatable: ^2.1.0
   flutter_bloc: ^9.1.1
@@ -26,6 +28,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
   assets:
     - assets/stories/thanh-giong/
     - assets/stories/thanh-giong/pages/

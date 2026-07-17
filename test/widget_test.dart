@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:storytelling/app/di/injection_container.dart';
 import 'package:storytelling/app/storytelling_app.dart';
@@ -14,7 +15,7 @@ void main() {
   });
 
   testWidgets('Home shows story list from mock repository', (tester) async {
-    await tester.pumpWidget(const StorytellingApp());
+    await tester.pumpWidget(const StorytellingApp(locale: Locale('vi')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
@@ -23,7 +24,7 @@ void main() {
   });
 
   testWidgets('Selecting a story opens its three-mode hub', (tester) async {
-    await tester.pumpWidget(const StorytellingApp());
+    await tester.pumpWidget(const StorytellingApp(locale: Locale('vi')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
@@ -37,6 +38,6 @@ void main() {
     expect(find.text('Đọc truyện'), findsOneWidget);
     expect(find.text('Chơi'), findsOneWidget);
     expect(find.text('Luyện nói'), findsOneWidget);
-    expect(find.text('Sắp ra mắt'), findsOneWidget);
+    expect(find.text('Sắp có'), findsOneWidget);
   });
 }

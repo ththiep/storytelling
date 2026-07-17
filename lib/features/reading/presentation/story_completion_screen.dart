@@ -9,6 +9,7 @@ import 'package:storytelling/features/play/presentation/story_game_screen.dart';
 import 'package:storytelling/features/reading/application/story_reader_bloc.dart';
 import 'package:storytelling/features/reading/application/story_reader_event.dart';
 import 'package:storytelling/features/reading/application/story_reader_state.dart';
+import 'package:storytelling/l10n/app_localizations.dart';
 import 'package:storytelling/shared/widgets/story_back_button.dart';
 import 'package:storytelling/shared/widgets/story_image.dart';
 import 'package:storytelling/shared/widgets/stroke_text.dart';
@@ -21,6 +22,7 @@ class StoryCompletionView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.storyTheme;
+    final l10n = AppLocalizations.of(context);
     final bloc = context.read<StoryReaderBloc>();
 
     return Column(
@@ -72,7 +74,7 @@ class StoryCompletionView extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
                         StrokeText(
-                          text: 'Chúc mừng!',
+                          text: l10n.completionTitle,
                           textAlign: TextAlign.center,
                           strokeColor: AppColors.strokeTitle,
                           strokeWidth: 4,
@@ -84,7 +86,7 @@ class StoryCompletionView extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Con đã nghe xong câu chuyện\n"${state.story.title}"',
+                          l10n.completionMessage(state.story.title),
                           textAlign: TextAlign.center,
                           style: theme.bodyLarge,
                         ),
@@ -93,8 +95,8 @@ class StoryCompletionView extends StatelessWidget {
                           iconAsset: AppAssets.playButton,
                           iconColor: theme.readingColor,
                           iconBackground: theme.readingBackground,
-                          title: 'Bạn có muốn nghe lại không?',
-                          subtitle: 'Nghe lại từ đầu',
+                          title: l10n.listenAgainQuestion,
+                          subtitle: l10n.listenAgainAction,
                           onTap: () {
                             bloc.add(const StoryReaderListenAgainPressed());
                           },
@@ -104,8 +106,8 @@ class StoryCompletionView extends StatelessWidget {
                           iconAsset: AppAssets.storyBook,
                           iconColor: theme.playColor,
                           iconBackground: theme.playBackground,
-                          title: 'Bạn có muốn chơi game không?',
-                          subtitle: 'Chơi game cùng câu chuyện',
+                          title: l10n.playGameQuestion,
+                          subtitle: l10n.playGameAction,
                           onTap: () {
                             Navigator.of(context).push(
                               MaterialPageRoute<void>(
@@ -158,11 +160,7 @@ class _CompletionHeader extends StatelessWidget {
                   style: theme.sectionTitle,
                 ),
               ),
-              Image.asset(
-                AppAssets.completeStory,
-                width: 28,
-                height: 28,
-              ),
+              Image.asset(AppAssets.completeStory, width: 28, height: 28),
             ],
           ),
         ),
@@ -228,11 +226,7 @@ class _CompletionOptionCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                Image.asset(
-                  AppAssets.rightChevron,
-                  width: 18,
-                  height: 18,
-                ),
+                Image.asset(AppAssets.rightChevron, width: 18, height: 18),
               ],
             ),
           ),

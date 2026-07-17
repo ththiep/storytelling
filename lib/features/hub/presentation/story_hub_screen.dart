@@ -5,6 +5,7 @@ import 'package:storytelling/app/theme/app_colors.dart';
 import 'package:storytelling/app/theme/theme_manager.dart';
 import 'package:storytelling/features/play/presentation/story_game_screen.dart';
 import 'package:storytelling/features/reading/presentation/story_reader_screen.dart';
+import 'package:storytelling/l10n/app_localizations.dart';
 import 'package:storytelling/shared/models/story.dart';
 import 'package:storytelling/shared/widgets/story_back_button.dart';
 import 'package:storytelling/shared/widgets/story_image.dart';
@@ -18,6 +19,7 @@ class StoryHubScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.storyTheme;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       body: StoryScaffoldBackground(
@@ -46,7 +48,7 @@ class StoryHubScreen extends StatelessWidget {
                               Align(
                                 alignment: Alignment.centerLeft,
                                 child: Text(
-                                  'Con muốn làm gì?',
+                                  l10n.hubQuestion,
                                   style: theme.screenTitle.copyWith(
                                     fontSize: 22,
                                   ),
@@ -57,16 +59,14 @@ class StoryHubScreen extends StatelessWidget {
                                 icon: Icons.auto_stories_rounded,
                                 color: theme.readingColor,
                                 backgroundColor: theme.readingBackground,
-                                title: 'Đọc truyện',
-                                subtitle:
-                                    'Nghe kể chuyện và đọc theo từng từ',
-                                actionLabel: 'Bắt đầu đọc',
+                                title: l10n.readStoryTitle,
+                                subtitle: l10n.readStorySubtitle,
+                                actionLabel: l10n.readStoryAction,
                                 onTap: () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute<void>(
-                                      builder: (_) => StoryReaderScreen(
-                                        storyId: story.id,
-                                      ),
+                                      builder: (_) =>
+                                          StoryReaderScreen(storyId: story.id),
                                     ),
                                   );
                                 },
@@ -76,10 +76,9 @@ class StoryHubScreen extends StatelessWidget {
                                 icon: Icons.extension_rounded,
                                 color: theme.playColor,
                                 backgroundColor: theme.playBackground,
-                                title: 'Chơi',
-                                subtitle:
-                                    'Ghép các hình theo đúng thứ tự câu chuyện',
-                                actionLabel: 'Chơi ngay',
+                                title: l10n.playTitle,
+                                subtitle: l10n.playSubtitle,
+                                actionLabel: l10n.playAction,
                                 onTap: story.pages.isEmpty
                                     ? null
                                     : () {
@@ -98,10 +97,9 @@ class StoryHubScreen extends StatelessWidget {
                                 icon: Icons.mic_rounded,
                                 color: theme.speakingColor,
                                 backgroundColor: theme.speakingBackground,
-                                title: 'Luyện nói',
-                                subtitle:
-                                    'Đọc thành tiếng để cả nhà cùng lắng nghe',
-                                actionLabel: 'Sắp ra mắt',
+                                title: l10n.speakTitle,
+                                subtitle: l10n.speakSubtitle,
+                                actionLabel: l10n.comingSoon,
                                 onTap: null,
                               ),
                             ],
@@ -157,6 +155,7 @@ class _StorySummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.storyTheme;
+    final l10n = AppLocalizations.of(context);
 
     return DecoratedBox(
       decoration: theme.storyCardDecoration(),
@@ -191,12 +190,12 @@ class _StorySummary extends StatelessWidget {
                     children: [
                       _SummaryBadge(
                         iconAsset: AppAssets.storyTime,
-                        text: '${story.durationMinutes} phút',
+                        text: l10n.minutesCount(story.durationMinutes),
                         color: theme.readingColor,
                       ),
                       _SummaryBadge(
                         iconAsset: AppAssets.storyBook,
-                        text: '${story.pages.length} trang',
+                        text: l10n.pagesCount(story.pages.length),
                         color: theme.brandSecondary,
                       ),
                     ],
@@ -243,10 +242,7 @@ class _SummaryBadge extends StatelessWidget {
             else
               Icon(icon, size: 15, color: color),
             const SizedBox(width: 4),
-            Text(
-              text,
-              style: theme.badge.copyWith(color: color),
-            ),
+            Text(text, style: theme.badge.copyWith(color: color)),
           ],
         ),
       ),
@@ -311,9 +307,7 @@ class _ModeCard extends StatelessWidget {
                     Text(
                       title,
                       style: theme.modeTitle.copyWith(
-                        color: enabled
-                            ? theme.textPrimary
-                            : theme.textDisabled,
+                        color: enabled ? theme.textPrimary : theme.textDisabled,
                       ),
                     ),
                     const SizedBox(height: 4),

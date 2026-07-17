@@ -8,6 +8,7 @@ import 'package:storytelling/features/catalog/presentation/bloc/story_list_bloc.
 import 'package:storytelling/features/catalog/presentation/bloc/story_list_event.dart';
 import 'package:storytelling/features/catalog/presentation/bloc/story_list_state.dart';
 import 'package:storytelling/features/hub/presentation/story_hub_screen.dart';
+import 'package:storytelling/l10n/app_localizations.dart';
 import 'package:storytelling/shared/models/story.dart';
 import 'package:storytelling/shared/widgets/story_image.dart';
 import 'package:storytelling/shared/widgets/story_scaffold_background.dart';
@@ -19,6 +20,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.storyTheme;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       body: StoryScaffoldBackground(
@@ -30,7 +32,7 @@ class HomeScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
                 child: StrokeText(
-                  text: 'Góc kể chuyện',
+                  text: l10n.homeTitle,
                   strokeColor: AppColors.strokeTitle,
                   strokeWidth: 4,
                   shadowOffset: const Offset(0, 3),
@@ -48,8 +50,7 @@ class HomeScreen extends StatelessWidget {
                       ..add(const StoryListRefreshed());
                     await bloc.stream.firstWhere(
                       (state) =>
-                          state is StoryListLoaded ||
-                          state is StoryListFailure,
+                          state is StoryListLoaded || state is StoryListFailure,
                     );
                   },
                   child: CustomScrollView(
@@ -67,37 +68,36 @@ class HomeScreen extends StatelessWidget {
                               SliverFillRemaining(
                                 hasScrollBody: false,
                                 child: Center(
-                                  child: Text('Lỗi tải chuyện: $message'),
+                                  child: Text(l10n.loadStoriesError(message)),
                                 ),
                               ),
                             StoryListLoaded(:final stories) => SliverPadding(
                               padding: const EdgeInsets.fromLTRB(16, 4, 16, 28),
                               sliver: SliverGrid(
                                 gridDelegate:
-                                    const
-                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
                                       crossAxisCount: 2,
                                       mainAxisSpacing: 16,
                                       crossAxisSpacing: 14,
                                       childAspectRatio: 0.68,
                                     ),
-                                delegate: SliverChildBuilderDelegate(
-                                  (context, index) {
-                                    final story = stories[index];
-                                    return _StoryGridCard(
-                                      story: story,
-                                      onTap: () {
-                                        Navigator.of(context).push(
-                                          MaterialPageRoute<void>(
-                                            builder: (_) =>
-                                                StoryHubScreen(story: story),
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  },
-                                  childCount: stories.length,
-                                ),
+                                delegate: SliverChildBuilderDelegate((
+                                  context,
+                                  index,
+                                ) {
+                                  final story = stories[index];
+                                  return _StoryGridCard(
+                                    story: story,
+                                    onTap: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute<void>(
+                                          builder: (_) =>
+                                              StoryHubScreen(story: story),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                }, childCount: stories.length),
                               ),
                             ),
                           };

@@ -9,6 +9,7 @@ import 'package:storytelling/features/reading/application/story_reader_bloc.dart
 import 'package:storytelling/features/reading/application/story_reader_event.dart';
 import 'package:storytelling/features/reading/application/story_reader_state.dart';
 import 'package:storytelling/features/reading/presentation/story_completion_screen.dart';
+import 'package:storytelling/l10n/app_localizations.dart';
 import 'package:storytelling/shared/widgets/karaoke_text.dart';
 import 'package:storytelling/shared/widgets/story_back_button.dart';
 import 'package:storytelling/shared/widgets/story_image.dart';
@@ -39,6 +40,7 @@ class _StoryReaderViewState extends State<_StoryReaderView> {
   @override
   Widget build(BuildContext context) {
     final theme = context.storyTheme;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       body: StoryScaffoldBackground(
@@ -61,7 +63,7 @@ class _StoryReaderViewState extends State<_StoryReaderView> {
                 ),
                 StoryReaderFailure(:final message) => Center(
                   child: Text(
-                    'Lỗi: $message',
+                    l10n.readerError(message),
                     style: theme.bodyMedium.copyWith(color: theme.error),
                   ),
                 ),
@@ -69,8 +71,10 @@ class _StoryReaderViewState extends State<_StoryReaderView> {
                   children: [
                     _ReaderHeader(
                       title: ready.story.title,
-                      subtitle:
-                          'Trang ${ready.pageIndex + 1}/${ready.playback.pages.length}',
+                      subtitle: l10n.readerPageCount(
+                        ready.pageIndex + 1,
+                        ready.playback.pages.length,
+                      ),
                       onClose: () {
                         context.read<StoryReaderBloc>().add(
                           const StoryReaderClosed(),
@@ -231,14 +235,15 @@ class _ReaderControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.storyTheme;
+    final l10n = AppLocalizations.of(context);
     final bloc = context.read<StoryReaderBloc>();
     final status = state.isFinished
-        ? 'Con đã nghe xong rồi!'
+        ? l10n.readerFinishedStatus
         : state.isSpeaking
-        ? 'Đang kể chuyện...'
+        ? l10n.readerSpeakingStatus
         : state.isPaused
-        ? 'Tạm dừng'
-        : 'Chạm nút để nghe tiếp';
+        ? l10n.readerPausedStatus
+        : l10n.readerIdleStatus;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -316,6 +321,7 @@ class _CompleteStoryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.storyTheme;
+    final l10n = AppLocalizations.of(context);
 
     return Material(
       color: AppColors.transparent,
@@ -328,9 +334,9 @@ class _CompleteStoryButton extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image.asset(AppAssets.completeStory, width: 24, height: 24),
+              Image.asset(AppAssets.completeStory, width: 40, height: 40),
               const SizedBox(height: 4),
-              Text('Đọc xong', style: theme.caption),
+              Text(l10n.finishReading, style: theme.caption),
             ],
           ),
         ),
@@ -348,6 +354,7 @@ class _AutoTurnPageSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.storyTheme;
+    final l10n = AppLocalizations.of(context);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(10, 4, 8, 4),
@@ -356,7 +363,7 @@ class _AutoTurnPageSwitch extends StatelessWidget {
         children: [
           Icon(Icons.auto_stories_rounded, size: 16, color: theme.readingColor),
           const SizedBox(width: 6),
-          Text('Tự lật trang', style: theme.caption),
+          Text(l10n.autoTurnPage, style: theme.caption),
           const SizedBox(width: 6),
           Switch(
             value: enabled,

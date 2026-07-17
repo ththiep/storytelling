@@ -1,0 +1,94 @@
+{
+  "@@locale": "en",
+  "appTitle": "Story Time",
+  "homeTitle": "Story Time",
+  "loadStoriesError": "Oops, stories did not load: {message}",
+  "@loadStoriesError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "hubQuestion": "What do you want to do?",
+  "readStoryTitle": "Read",
+  "readStorySubtitle": "Listen and read each word",
+  "readStoryAction": "Start",
+  "playTitle": "Play",
+  "playSubtitle": "Put the pictures in order",
+  "playAction": "Play",
+  "speakTitle": "Talk",
+  "speakSubtitle": "Read out loud",
+  "comingSoon": "Soon",
+  "minutesCount": "{count} min",
+  "@minutesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pagesCount": "{count} pages",
+  "@pagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "readerPageCount": "Page {current}/{total}",
+  "@readerPageCount": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "readerError": "Oops: {message}",
+  "@readerError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "readerFinishedStatus": "All done!",
+  "readerSpeakingStatus": "Reading...",
+  "readerPausedStatus": "Paused",
+  "readerIdleStatus": "Tap play",
+  "autoTurnPage": "Auto page",
+  "finishReading": "Done",
+  "completionTitle": "Great job!",
+  "completionMessage": "You finished\n\"{title}\"",
+  "@completionMessage": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "listenAgainQuestion": "Listen again?",
+  "listenAgainAction": "Start over",
+  "playGameQuestion": "Play a game?",
+  "playGameAction": "Play with this story",
+  "gameSubtitle": "Put pages in order",
+  "gameCompleteTitle": "All done!",
+  "gameCompleteMessage": "You put the pictures in order!",
+  "puzzleNoPictures": "No pictures to play yet.",
+  "puzzleSolved": "Yay! The pages are in order.",
+  "puzzleInstructions": "Tap a picture, then tap a page spot.\nYou can also drag it.",
+  "puzzleSelected": "Picture picked. Tap a page spot.",
+  "puzzlePiecesTitle": "Pictures",
+  "shuffleAgain": "Mix again",
+  "pageLabel": "Page {number}",
+  "@pageLabel": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  }
+}

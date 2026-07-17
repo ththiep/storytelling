@@ -4,13 +4,11 @@ import 'package:flutter/material.dart';
 
 import 'package:storytelling/app/theme/app_colors.dart';
 import 'package:storytelling/app/theme/theme_manager.dart';
+import 'package:storytelling/l10n/app_localizations.dart';
 import 'package:storytelling/shared/widgets/story_image.dart';
 
 class PagePuzzlePiece {
-  const PagePuzzlePiece({
-    required this.pageIndex,
-    required this.imageUrl,
-  });
+  const PagePuzzlePiece({required this.pageIndex, required this.imageUrl});
 
   final int pageIndex;
   final String imageUrl;
@@ -62,8 +60,9 @@ class _PageOrderPuzzleGameState extends State<PageOrderPuzzleGame> {
   void _selectPiece(int pieceIndex) {
     if (_isSolved) return;
     setState(() {
-      _selectedPieceIndex =
-          _selectedPieceIndex == pieceIndex ? null : pieceIndex;
+      _selectedPieceIndex = _selectedPieceIndex == pieceIndex
+          ? null
+          : pieceIndex;
     });
   }
 
@@ -73,10 +72,7 @@ class _PageOrderPuzzleGameState extends State<PageOrderPuzzleGame> {
     _placePieceInSlot(pieceIndex: selected, slotIndex: slotIndex);
   }
 
-  void _placePieceInSlot({
-    required int pieceIndex,
-    required int slotIndex,
-  }) {
+  void _placePieceInSlot({required int pieceIndex, required int slotIndex}) {
     if (_isSolved) return;
 
     setState(() {
@@ -131,11 +127,12 @@ class _PageOrderPuzzleGameState extends State<PageOrderPuzzleGame> {
   @override
   Widget build(BuildContext context) {
     final theme = context.storyTheme;
+    final l10n = AppLocalizations.of(context);
 
     if (widget.pieces.isEmpty) {
       return Center(
         child: Text(
-          'Câu chuyện này chưa có hình để ghép.',
+          l10n.puzzleNoPictures,
           textAlign: TextAlign.center,
           style: theme.bodyMedium.copyWith(color: theme.textSecondary),
         ),
@@ -148,10 +145,10 @@ class _PageOrderPuzzleGameState extends State<PageOrderPuzzleGame> {
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
           child: Text(
             _isSolved
-                ? 'Tuyệt vời! Con đã ghép đúng thứ tự các trang.'
+                ? l10n.puzzleSolved
                 : _selectedPieceIndex == null
-                ? 'Chạm chọn mảnh hình, rồi chạm vào ô trang để ghép.\nHoặc kéo mảnh hình thả vào ô.'
-                : 'Đã chọn 1 mảnh. Chạm vào ô trang để đặt vào.',
+                ? l10n.puzzleInstructions
+                : l10n.puzzleSelected,
             textAlign: TextAlign.center,
             style: theme.bodySmall.copyWith(
               fontWeight: FontWeight.w700,
@@ -180,10 +177,7 @@ class _PageOrderPuzzleGameState extends State<PageOrderPuzzleGame> {
               },
               onFilledSlotDoubleTapped: _returnSlotPieceToPool,
               onPieceDropped: ({required pieceIndex, required slotIndex}) {
-                _placePieceInSlot(
-                  pieceIndex: pieceIndex,
-                  slotIndex: slotIndex,
-                );
+                _placePieceInSlot(pieceIndex: pieceIndex, slotIndex: slotIndex);
               },
             ),
           ),
@@ -195,7 +189,7 @@ class _PageOrderPuzzleGameState extends State<PageOrderPuzzleGame> {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Các mảnh hình',
+                l10n.puzzlePiecesTitle,
                 style: theme.caption.copyWith(color: theme.textSecondary),
               ),
             ),
@@ -223,7 +217,7 @@ class _PageOrderPuzzleGameState extends State<PageOrderPuzzleGame> {
           child: TextButton.icon(
             onPressed: _resetPuzzle,
             icon: const Icon(Icons.shuffle_rounded),
-            label: const Text('Xáo trộn lại'),
+            label: Text(l10n.shuffleAgain),
           ),
         ),
       ],
@@ -280,7 +274,8 @@ class _PuzzleBoard extends StatelessWidget {
                   onFilledTapped: (pieceIndex) {
                     onFilledSlotTapped(slotIndex, pieceIndex);
                   },
-                  onFilledDoubleTapped: () => onFilledSlotDoubleTapped(slotIndex),
+                  onFilledDoubleTapped: () =>
+                      onFilledSlotDoubleTapped(slotIndex),
                   onPieceDropped: (pieceIndex) {
                     onPieceDropped(
                       pieceIndex: pieceIndex,
@@ -324,6 +319,7 @@ class _PuzzleSlot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.storyTheme;
+    final l10n = AppLocalizations.of(context);
     final isCorrect =
         piece != null && piece!.pageIndex == slotIndex && !isSolved;
     final isWrong = piece != null && piece!.pageIndex != slotIndex;
@@ -353,9 +349,7 @@ class _PuzzleSlot extends StatelessWidget {
               duration: const Duration(milliseconds: 180),
               decoration: BoxDecoration(
                 color: piece == null
-                    ? (isHighlighted
-                          ? AppColors.brand100
-                          : AppColors.brand50)
+                    ? (isHighlighted ? AppColors.brand100 : AppColors.brand50)
                     : AppColors.transparent,
                 border: isSolved
                     ? null
@@ -414,7 +408,7 @@ class _PuzzleSlot extends StatelessWidget {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'Trang ${slotIndex + 1}',
+                            l10n.pageLabel(slotIndex + 1),
                             style: theme.bodySmall.copyWith(
                               fontWeight: FontWeight.w800,
                             ),
@@ -527,6 +521,7 @@ class _PuzzlePieceImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.storyTheme;
+    final l10n = AppLocalizations.of(context);
 
     return Stack(
       fit: StackFit.expand,
@@ -546,12 +541,9 @@ class _PuzzlePieceImage extends StatelessWidget {
                 borderRadius: theme.radiusSmall,
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 child: Text(
-                  'Trang ${piece.pageIndex + 1}',
+                  l10n.pageLabel(piece.pageIndex + 1),
                   style: theme.caption.copyWith(color: AppColors.white),
                 ),
               ),
