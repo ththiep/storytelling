@@ -146,13 +146,32 @@ class StoryReaderBloc extends Bloc<StoryReaderEvent, StoryReaderState> {
     emit(current.copyWith(autoTurnPage: event.enabled));
   }
 
-  void _onTimelineProgressed(
+  Future<void> _onTimelineProgressed(
     StoryReaderTimelineProgressed event,
     Emitter<StoryReaderState> emit,
-  ) {
+  ) async {
     final current = state;
     if (current is! StoryReaderReady) return;
     if (!current.isSpeaking) return;
+
+    if (!current.autoTurnPage && event.pageIndex != current.pageIndex) {
+      final page = current.currentPage;
+      final endWordIndex = page == null
+          ? current.activeWordIndex
+          : wordIndexAt(page.allWords, page.endTimeMs);
+
+      emit(
+        current.copyWith(
+          status: ReaderStatus.paused,
+          activeWordIndex: endWordIndex,
+        ),
+      );
+      await _audio.pause();
+      if (page != null) {
+        await _audio.seekTo(page.endTimeMs);
+      }
+      return;
+    }
 
     final nextPageIndex = current.autoTurnPage
         ? event.pageIndex

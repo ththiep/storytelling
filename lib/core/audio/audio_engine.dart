@@ -121,6 +121,7 @@ class AudioEngine {
 
   Future<void> pause() async {
     if (!_speaking) return;
+    _speaking = false;
     await _player.pause();
     _controller.add(const NarrationPaused());
   }
